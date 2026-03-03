@@ -16,7 +16,7 @@ export default function Packages() {
   async function fetchPackages() {
     try {
       const res = await packagesAPI.getAll();
-      setPackages(res.data.packages);
+      setPackages(res.data);
     } catch { setError('Failed to load packages.'); }
     finally { setLoading(false); }
   }

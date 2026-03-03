@@ -21,14 +21,14 @@ export default function Classes() {
   async function fetchClasses() {
     try {
       const res = await classesAPI.getAll();
-      setClasses(res.data.classes);
+      setClasses(res.data);
     } catch { setError('Failed to load classes.'); }
   }
 
   async function fetchInstructors() {
     try {
       const res = await instructorsAPI.getAll();
-      setInstructors(res.data.instructors);
+      setInstructors(res.data);
     } catch {}
   }
 

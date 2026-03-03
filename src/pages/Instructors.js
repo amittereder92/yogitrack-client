@@ -17,7 +17,7 @@ export default function Instructors() {
   async function fetchInstructors() {
     try {
       const res = await instructorsAPI.getAll();
-      setInstructors(res.data.instructors);
+      setInstructors(res.data);
     } catch {
       setError('Failed to load instructors.');
     } finally {

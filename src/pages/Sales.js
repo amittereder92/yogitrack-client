@@ -19,13 +19,13 @@ export default function Sales() {
   }, []);
 
   async function fetchSales() {
-    try { const res = await salesAPI.getAll(); setSales(res.data.sales); } catch {}
+  try { const res = await salesAPI.getAll(); setSales(res.data.sales); } catch {}
   }
   async function fetchCustomers() {
-    try { const res = await customersAPI.getAll(); setCustomers(res.data.customers); } catch {}
+    try { const res = await customersAPI.getAll(); setCustomers(res.data); } catch {}
   }
   async function fetchPackages() {
-    try { const res = await packagesAPI.getAll(); setPackages(res.data.packages); } catch {}
+    try { const res = await packagesAPI.getAll(); setPackages(res.data); } catch {}
   }
 
   function handlePackageChange(packageId) {

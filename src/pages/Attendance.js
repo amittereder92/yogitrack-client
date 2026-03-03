@@ -16,14 +16,15 @@ export default function Attendance() {
   });
 
   useEffect(() => {
-    Promise.all([fetchAttendances(), fetchInstructors()]).finally(() => setLoading(false));
+  Promise.all([fetchAttendances(), fetchInstructors()]).finally(() => setLoading(false));
   }, []);
 
-  async function fetchAttendances() {
-    try { const res = await attendanceAPI.getAll(); setAttendances(res.data.attendances); } catch {}
+async function fetchAttendances() {
+  try { const res = await attendanceAPI.getAll(); setAttendances(res.data.attendances); } catch {}
   }
-  async function fetchInstructors() {
-    try { const res = await instructorsAPI.getAll(); setInstructors(res.data.instructors); } catch {}
+
+async function fetchInstructors() {
+  try { const res = await instructorsAPI.getAll(); setInstructors(res.data); } catch {}
   }
 
   async function handleInstructorChange(instructorId) {
@@ -32,8 +33,8 @@ export default function Attendance() {
     if (!instructorId) return;
     try {
       const res = await attendanceAPI.getClassesByInstructor(instructorId);
-      setClasses(res.data.classes);
-    } catch { setClasses([]); }
+      setClasses(res.data);
+    } catch (err) { setClasses([]); }
   }
 
   function addCustomer() {

@@ -17,7 +17,7 @@ export default function Customers() {
   async function fetchCustomers() {
     try {
       const res = await customersAPI.getAll();
-      setCustomers(res.data.customers);
+      setCustomers(res.data);
     } catch {
       setError('Failed to load customers.');
     } finally {
