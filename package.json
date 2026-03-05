@@ -1,6 +1,20 @@
-"scripts": {
-  "start": "node src/yogiserver.cjs"
-},
-"engines": {
-  "node": "20.x"
+{
+  "name": "yogitrack-client",
+  "version": "0.1.0",
+  "description": "YogiTrack studio management app",
+  "main": "src/yogiserver.cjs",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/yogiserver.cjs"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.2.4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
