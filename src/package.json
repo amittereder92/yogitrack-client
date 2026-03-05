@@ -1,0 +1,6 @@
+"scripts": {
+  "start": "node src/yogiserver.cjs"
+},
+"engines": {
+  "node": "20.x"
+}
