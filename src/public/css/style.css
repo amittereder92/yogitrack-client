@@ -1,520 +1,169 @@
-/* ============================================================
-   YogiTrack — Design System
-   Palette: warm cream, sage green, terracotta, deep forest
-   Fonts: Cormorant Garamond (display) + DM Sans (body)
-   ============================================================ */
+/* ---------- Base & helpers ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f5f8f8; color: #333; }
+h1, h2 { margin: 0 0 1rem; font-weight: 600; }
+a { text-decoration: none; }
 
-:root {
-  --cream:       #f7f3ed;
-  --cream-dark:  #ede7dc;
-  --sage:        #7a9e87;
-  --sage-dark:   #5a7d67;
-  --teal:        #3d7a6e;
-  --teal-dark:   #2c5e54;
-  --terracotta:  #c4714a;
-  --forest:      #2c3e2d;
-  --text:        #2c2c2c;
-  --text-muted:  #7a7a6e;
-  --white:       #ffffff;
-  --shadow-sm:   0 2px 8px rgba(44,62,45,.08);
-  --shadow-md:   0 8px 32px rgba(44,62,45,.12);
-  --shadow-lg:   0 20px 60px rgba(44,62,45,.18);
-  --radius:      1rem;
-  --radius-sm:   0.5rem;
+.text--center { text-align: center; }
+
+/* ---------- Layout variations ---------- */
+.layout--center {
+  display: flex; justify-content: center; align-items: center; min-height: 100vh;
+  padding: 2rem;
+}
+.layout--sidebar { 
+  display: flex; 
+  min-height: 100vh; 
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ---------- Card ---------- */
+.card {
+  background: #fff; padding: 2rem; border-radius: 0.75rem;
+  box-shadow: 0 4px 14px rgba(0,0,0,.06); width: 100%; max-width: 480px;
+}
+.card--wide { max-width: 560px; }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  line-height: 1.6;
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 220px; background: #bee6e0; color: #05713d;
+  display: flex; flex-direction: column; gap: 2rem; padding: 2rem 1rem;
+}
+.logo-wrap { display: flex; align-items: center; gap: .5rem; color: inherit; font-weight: 600; }
+.logo { width: 100x; height: 100px; }
+.nav { display: flex; flex-direction: column; gap: 1rem; }
+.nav a { color: inherit; padding: .25rem 0; }
+.nav a.active, .nav a:hover { opacity: .8; }
+
+/* ---------- Form elements ---------- */
+input, textarea {
+  width: 100%; padding: .6rem .75rem; border: 1px solid #ccc;
+  border-radius: .5rem; font-size: 1rem; margin-top: .25rem;
+}
+textarea { resize: vertical; }
+
+label { display: block; font-size: .9rem; margin-bottom: .75rem; }
+
+fieldset { border: 1px solid #ddd; border-radius: .5rem; padding: .75rem 1rem; margin-bottom: 1rem; }
+legend { padding: 0 .25rem; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-block; padding: .6rem 1.25rem; border-radius: .5rem;
+  background: #e0e0e0; color: #333; border: none; cursor: pointer; font-size: .95rem;
+}
+.btn:hover { background: #d5d5d5; }
+.btn--primary { background: #008080; color: #fff; }
+.btn--primary:hover { background: #006c6c; }
+.btn--danger { background: #c0392b; color: #fff; }
+.btn--danger:hover { background: #992a20; }
+
+.btn-row { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin-top: 1.5rem; }
+
+/* ---------- Background image for dashboard ---------- */
+/* ---------- Full-page background with faint overlay ---------- */
+.bg--image {
+  position: relative;                     /* ① establish containing block */
+  background: url('../images/YogaClass.jpg') no-repeat center/cover fixed;
 }
 
-a { text-decoration: none; color: inherit; }
-h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; line-height: 1.15; }
-
-/* ============================================================
-   LANDING PAGE
-   ============================================================ */
-
-.landing {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
+/* ② the “veil” */
+.bg--image::before {
+  content: "";
+  position: absolute;
+  inset: 0;                               /* cover the whole body */
+  background: rgba(255, 255, 255, 0.55);  /* white veil @ 55% opacity */
+  /* Try rgba(0,128,128,.25) for a subtle teal tint instead */
+  pointer-events: none;                   /* don’t block clicks */
+  min-height: 100vh; 
 }
 
-/* ---- Left panel ---- */
-.landing__left {
-  background: var(--forest);
-  background-image:
-    url('../images/YogaClass.jpg');
-  background-size: cover;
-  background-position: center;
+
+.main-bg {
+  flex: 1;
   position: relative;
+  background: url('../images/YogaClass.jpg') no-repeat center center fixed;
+  background-size: cover;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 3.5rem;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
-/* dark overlay so text is readable */
-.landing__left::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    160deg,
-    rgba(44, 62, 45, 0.82) 0%,
-    rgba(44, 62, 45, 0.60) 60%,
-    rgba(61, 122, 110, 0.55) 100%
-  );
+/* Foreground content */
+.welcome-box {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 2.5rem 3rem;
+  border-radius: 1rem;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.12);
 }
 
-.landing__left-inner,
-.landing__studio {
+/* Background image applied to the layout wrapper */
+.background {
+  background: url('../images/YogaClass.jpg') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+}
+
+/* Only dims the main section */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4);  /* or use rgba(0, 0, 0, 0.3) for dark tint */
+  z-index: 0;
+  
+}
+
+/* Make sure all layout content appears above the overlay */
+.layout--sidebar,
+.main-fill,
+.sidebar,
+.welcome-box {
   position: relative;
   z-index: 1;
 }
 
-.landing__logo {
-  height: 64px;
-  width: auto;
-  margin-bottom: 3rem;
-  filter: brightness(0) invert(1);
-  opacity: 0.92;
-}
-
-.landing__title {
-  font-size: clamp(2.8rem, 5vw, 4.2rem);
-  color: var(--white);
-  font-weight: 300;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
-}
-
-.landing__title em {
-  font-style: italic;
-  color: #a8d4c0;
-}
-
-.landing__sub {
-  color: rgba(255,255,255,0.72);
-  font-size: 1rem;
-  max-width: 360px;
-  line-height: 1.7;
-  font-weight: 300;
-}
-
-.landing__studio {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.landing__studio-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
-  color: rgba(255,255,255,0.9);
-  font-style: italic;
-}
-
-.landing__studio-loc {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-/* ---- Right panel ---- */
-.landing__right {
-  background: var(--cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2rem;
-}
-
-/* ---- Login card ---- */
-.login-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 400px;
-  padding: 2.5rem 2.5rem 2rem;
-  animation: fadeUp 0.6s ease both;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.login-card__header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.login-card__leaf {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-}
-
-.login-card__title {
-  font-size: 2rem;
-  color: var(--forest);
-  margin-bottom: 0.4rem;
-}
-
-.login-card__hint {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.login-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.login-card__footer {
-  text-align: center;
-  margin-top: 2rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-/* ---- Field ---- */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.field__label {
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--forest);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.field__input {
-  padding: 0.75rem 1rem;
-  border: 1.5px solid var(--cream-dark);
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
-}
-
-.field__input:focus {
-  outline: none;
-  border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(122,158,135,0.15);
-  background: var(--white);
-}
-
-.field__input::placeholder { color: #bbb; }
-
-/* ---- Login button ---- */
-.btn-login {
-  display: block;
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.85rem;
-  background: var(--teal);
-  color: var(--white);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 14px rgba(61,122,110,0.3);
-}
-
-.btn-login:hover {
-  background: var(--teal-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(61,122,110,0.35);
-}
-
-.btn-login:active {
-  transform: translateY(0);
-}
-
-/* ============================================================
-   SHARED LAYOUT — Sidebar pages (dashboard, instructors, etc.)
-   ============================================================ */
-
-.app {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
-
-/* ---- Sidebar ---- */
-.sidebar {
-  background: var(--forest);
-  color: var(--white);
-  display: flex;
-  flex-direction: column;
-  padding: 2rem 1.5rem;
-  gap: 0;
-}
-
-.sidebar__logo {
-  height: 48px;
-  width: auto;
-  margin-bottom: 2.5rem;
-  filter: brightness(0) invert(1);
-  opacity: 0.9;
-}
-
-.sidebar__label {
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
-  margin-bottom: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.nav a {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
-  color: rgba(255,255,255,0.7);
-  font-size: 0.92rem;
-  transition: background 0.15s, color 0.15s;
-}
-
-.nav a:hover,
-.nav a.active {
-  background: rgba(255,255,255,0.1);
-  color: var(--white);
-}
-
-.nav a.active {
-  background: rgba(122,158,135,0.25);
-  color: #a8d4c0;
-}
-
-.sidebar__bottom {
-  margin-top: auto;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.35);
-}
-
-/* ---- Main content area ---- */
-.main {
-  background: var(--cream);
-  padding: 2.5rem 3rem;
-  overflow-y: auto;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 2.2rem;
-  color: var(--forest);
-}
-
-.page-header p {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-top: 0.25rem;
-}
-
-/* ---- Cards ---- */
-.card {
-  background: var(--white);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: 2rem;
-  width: 100%;
-}
-
-.card--wide { max-width: 700px; }
-
-.card__title {
-  font-size: 1.3rem;
-  color: var(--forest);
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--cream-dark);
-}
-
-/* ---- Form elements ---- */
-label {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--forest);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-}
-
-input, textarea, select {
-  width: 100%;
-  padding: 0.7rem 1rem;
-  border: 1.5px solid var(--cream-dark);
-  border-radius: var(--radius-sm);
-  font-size: 1rem;
-  font-family: 'DM Sans', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  margin-top: 0.25rem;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--sage);
-  box-shadow: 0 0 0 3px rgba(122,158,135,0.15);
-  background: var(--white);
-}
-
-textarea { resize: vertical; }
-
-fieldset {
-  border: 1.5px solid var(--cream-dark);
-  border-radius: var(--radius-sm);
-  padding: 1rem 1.25rem;
-  margin-bottom: 1rem;
-}
-
-legend {
-  padding: 0 0.5rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: var(--forest);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-
-/* ---- Buttons ---- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.25rem;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
-  background: var(--cream-dark);
-  color: var(--text);
-}
-
-.btn:hover { background: #ddd5c8; transform: translateY(-1px); }
-
-.btn--primary {
-  background: var(--teal);
-  color: var(--white);
-  box-shadow: 0 2px 8px rgba(61,122,110,0.25);
-}
-.btn--primary:hover { background: var(--teal-dark); }
-
-.btn--danger {
-  background: #c0392b;
-  color: var(--white);
-}
-.btn--danger:hover { background: #992a20; }
-
-.btn--outline {
-  background: transparent;
-  border: 1.5px solid var(--sage);
-  color: var(--sage-dark);
-}
-.btn--outline:hover { background: rgba(122,158,135,0.08); }
-
-.btn-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-/* ---- Dropdown / Select ---- */
-.styled-select {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1rem;
-  padding: 0.7rem 2.5rem 0.7rem 1rem;
-  border: 1.5px solid var(--cream-dark);
-  border-radius: var(--radius-sm);
-  width: 100%;
-  background-color: var(--cream);
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg width="12" height="8" viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg"><path d="M1.41.59L6 5.17l4.59-4.58L12 2l-6 6-6-6z" fill="%232c3e2d"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 0.9rem top 50%;
-  background-size: 0.65rem auto;
-}
-
-/* ---- Radio rows ---- */
 .radio-row {
   display: flex;
-  gap: 2rem;
+  gap: 50px;
   align-items: center;
+  justify-content: center; 
 }
 
-/* ---- Text helpers ---- */
-.text--center { text-align: center; }
-.text--muted { color: var(--text-muted); font-size: 0.9rem; }
+/* Matches style of text inputs */
+.form-input,
+select.form-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 5px;
+}
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 768px) {
-  .landing {
-    grid-template-columns: 1fr;
-  }
-  .landing__left {
-    min-height: 40vh;
-    padding: 2.5rem 2rem;
-  }
-  .landing__title { font-size: 2.5rem; }
-
-  .app {
-    grid-template-columns: 1fr;
-  }
-  .sidebar {
-    display: none; /* replace with hamburger menu later */
-  }
-  .main {
-    padding: 1.5rem;
-  }
+/* Style for select dropdown to match input fields */
+.styled-select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  background-color: #fff;
+  appearance: none;       /* Remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg width="12" height="8" viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg"><path d="M1.41.59L6 5.17l4.59-4.58L12 2l-6 6-6-6z" fill="%23333"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.7rem top 50%;
+  background-size: 0.65rem auto;
 }
