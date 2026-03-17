@@ -1,28 +1,34 @@
 require('dotenv').config();
-const express = require("express");
-const session = require("express-session");
-const app     = express();
+const express    = require("express");
+const session    = require("express-session");
+const MongoStore = require("connect-mongo");
+const app        = express();
 
 require("./config/mongodbconn.cjs");
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 
-// Session middleware
+// Persistent session store in MongoDB
 app.use(session({
   secret:            process.env.SESSION_SECRET || "yogitrack-secret-key",
   resave:            false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl:      14 * 24 * 60 * 60, // 14 days
+  }),
   cookie: {
     secure:   false,
     httpOnly: true,
-    maxAge:   1000 * 60 * 60 * 8,
+    maxAge:   1000 * 60 * 60 * 24 * 14,
   }
 }));
 
 // Routes
 app.use("/api/auth",       require("./routes/authRoutes.cjs"));
 app.use("/api/portal",     require("./routes/customerPortalRoutes.cjs"));
+app.use("/api/qr",         require("./routes/qrRoutes.cjs"));
 app.use("/api/instructor", require("./routes/instructorRoutes.cjs"));
 app.use("/api/package",    require("./routes/packageRoutes.cjs"));
 app.use("/api/schedule",   require("./routes/scheduleRoutes.cjs"));

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>YogiTrack • Check In</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: url('images/YogaClass.jpg') center / cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(40,28,20,0.55);
+      pointer-events: none;
+    }
+    .checkin-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(247,243,238,0.96);
+      border-radius: 12px;
+      padding: 2rem 2rem 2.5rem;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    }
+    .logo { width: 70px; height: auto; margin: 0 auto 1rem; display: block; }
+    .studio-name {
+      font-family: 'Fraunces', serif;
+      font-size: 13px;
+      color: #9a8e84;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0 0 1.5rem;
+    }
+    .class-name {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      color: #3d3028;
+      font-weight: 300;
+      margin: 0 0 0.25rem;
+    }
+    .valid-until {
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      color: #9a8e84;
+      letter-spacing: 0.08em;
+      margin: 0 0 1.75rem;
+    }
+    .status-box {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      display: none;
+    }
+    .status-box.success { background: #e4ede0; color: #3d6b2e; border: 1px solid #b2d4a8; }
+    .status-box.error   { background: #f8e8e8; color: #842029; border: 1px solid #f1aeb5; }
+    .status-box.loading { background: #ede8e0; color: #7a6e65; border: 1px solid #c2b9a7; }
+
+    .email-field { text-align: left; margin-bottom: 1rem; }
+    .email-field label {
+      display: block;
+      font-family: 'Lato', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9a8e84;
+      margin-bottom: 0.3rem;
+    }
+    .email-field input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid #c2b9a7;
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: 'Lato', sans-serif;
+      background: #faf8f5;
+      color: #3d3028;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-field input:focus { border-color: #7a8c6e; }
+
+    .checkin-btn {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 6px;
+      border: none;
+      background: #7a8c6e;
+      color: #faf8f5;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .checkin-btn:hover { background: #5a6b50; }
+    .checkin-btn:disabled { background: #c2b9a7; cursor: not-allowed; }
+
+    .success-icon {
+      font-size: 48px;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+    .balance-info {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: #9a8e84;
+      margin-top: 0.75rem;
+    }
+    .divider {
+      height: 1px;
+      background: rgba(194,185,167,0.4);
+      margin: 1.25rem 0;
+    }
+    .logged-in-name {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: #3d3028;
+      margin-bottom: 1rem;
+    }
+    .not-you {
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      color: #9a8e84;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="checkin-card">
+    <img src="images/Logo.png" alt="YogiTrack" class="logo">
+    <p class="studio-name">Yoga H'om</p>
+
+    <div id="loadingState">
+      <p style="font-family:'Lato',sans-serif; color:#9a8e84; font-size:13px;">Loading class info...</p>
+    </div>
+
+    <div id="mainContent" style="display:none;">
+      <div class="class-name" id="className"></div>
+      <div class="valid-until" id="validUntil"></div>
+
+      <div class="status-box" id="statusBox"></div>
+      <div class="success-icon" id="successIcon">✓</div>
+
+      <div id="checkinForm">
+        <!-- Logged in customer -->
+        <div id="loggedInView" style="display:none;">
+          <p class="logged-in-name">Checking in as <strong id="loggedInName"></strong></p>
+          <button class="checkin-btn" id="autoCheckinBtn" onclick="doCheckin()">Check In Now</button>
+          <p class="not-you" onclick="showEmailView()">Not you? Use email instead</p>
+        </div>
+
+        <!-- Email entry -->
+        <div id="emailView" style="display:none;">
+          <div class="email-field">
+            <label for="emailInput">Your Email</label>
+            <input type="email" id="emailInput" placeholder="you@email.com" autocomplete="email">
+          </div>
+          <button class="checkin-btn" onclick="doCheckin()">Check In</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorState" style="display:none;">
+      <div class="status-box error" style="display:block;" id="errorStateMsg"></div>
+      <a href="/" style="font-family:'Lato',sans-serif; font-size:12px; color:#7a8c6e;">← Back to home</a>
+    </div>
+  </div>
+
+  <script>
+    let token = null;
+    let classData = null;
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      token = params.get('token');
+
+      if (!token) {
+        showError('Invalid QR code. Please scan again.');
+        return;
+      }
+
+      try {
+        // Validate token
+        const res  = await fetch(`/api/qr/validate?token=${token}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.valid) {
+          showError(data.error || 'This QR code is invalid or has expired.');
+          return;
+        }
+
+        classData = data;
+        document.getElementById('className').textContent = data.className;
+        const until = new Date(data.validUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('validUntil').textContent = `Check-in window closes at ${until}`;
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('mainContent').style.display  = 'block';
+
+        // Check if customer is logged in
+        const meRes  = await fetch('/api/auth/me');
+        const meData = await meRes.json();
+
+        if (meData.loggedIn && meData.user.role === 'customer') {
+          document.getElementById('loggedInName').textContent = meData.user.displayName;
+          document.getElementById('loggedInView').style.display = 'block';
+        } else {
+          document.getElementById('emailView').style.display = 'block';
+        }
+
+      } catch (err) {
+        showError('Could not connect. Please try again.');
+      }
+    }
+
+    function showEmailView() {
+      document.getElementById('loggedInView').style.display = 'none';
+      document.getElementById('emailView').style.display    = 'block';
+    }
+
+    async function doCheckin() {
+      const statusBox = document.getElementById('statusBox');
+      const email     = document.getElementById('emailInput')?.value?.trim();
+
+      statusBox.className = 'status-box loading';
+      statusBox.textContent = 'Checking in...';
+      statusBox.style.display = 'block';
+
+      try {
+        const body = { token };
+        if (email) body.email = email;
+
+        const res  = await fetch('/api/qr/checkin', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          statusBox.className   = 'status-box error';
+          statusBox.textContent = data.error || 'Check-in failed. Please try again.';
+          return;
+        }
+
+        // Success!
+        statusBox.className   = 'status-box success';
+        statusBox.textContent = data.message;
+        document.getElementById('checkinForm').style.display = 'none';
+        document.getElementById('successIcon').style.display = 'block';
+
+        if (data.newBalance !== undefined) {
+          const balEl = document.createElement('p');
+          balEl.className = 'balance-info';
+          balEl.textContent = `${data.newBalance} class${data.newBalance !== 1 ? 'es' : ''} remaining`;
+          statusBox.after(balEl);
+        }
+
+      } catch (err) {
+        statusBox.className   = 'status-box error';
+        statusBox.textContent = 'Could not connect. Please try again.';
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('loadingState').style.display  = 'none';
+      document.getElementById('mainContent').style.display   = 'none';
+      document.getElementById('errorState').style.display    = 'block';
+      document.getElementById('errorStateMsg').textContent   = msg;
+    }
+
+    // Allow enter key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doCheckin();
+    });
+
+    init();
+  </script>
+</body>
+</html>
