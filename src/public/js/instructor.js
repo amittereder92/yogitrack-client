@@ -174,6 +174,7 @@ function setFormForSearch() {
   document.getElementById("instructorIdText").value = "";
   document.getElementById("instructorIdText").style.display = "none";
   document.getElementById("instructorForm").reset();
+  document.getElementById("addBtn").disabled = false;
 }
 
 function setFormForAdd() {
@@ -182,4 +183,5 @@ function setFormForAdd() {
   document.getElementById("instructorIdTextLabel").style.display = "block";
   document.getElementById("instructorIdText").value = "";
   document.getElementById("instructorForm").reset();
+  document.getElementById("addBtn").disabled = true;
 }
