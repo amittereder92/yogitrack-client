@@ -2,24 +2,195 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Welcome</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+
+    .back-link {
+  display: inline-block;
+  margin-top: 1.25rem;
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(11px, 0.9vw, 13px);
+  color: #7a8c6e;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #5a6b50;
+  text-decoration: underline;
+}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: url('images/YogaClass.jpg') center / cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to right,
+        rgba(40,28,20,0.82) 0%,
+        transparent 25%,
+        transparent 75%,
+        rgba(40,28,20,0.82) 100%
+      );
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(247, 243, 238, 0.94);
+      backdrop-filter: blur(3px);
+      border: 1px solid rgba(194, 185, 167, 0.4);
+      border-radius: 6px;
+      padding: clamp(2rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 40px rgba(61, 48, 40, 0.15);
+    }
+    .login-card img {
+      width: clamp(80px, 12vw, 130px);
+      height: auto;
+      display: block;
+      margin: 0 auto 1.25rem;
+    }
+    .login-card h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: clamp(20px, 2.5vw, 26px);
+      color: #3d3028;
+      margin: 0 0 0.25rem;
+    }
+    .tagline {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+      color: #9a8e84;
+      letter-spacing: 0.06em;
+      margin: 0 0 1.75rem;
+    }
+    .login-field { text-align: left; margin-bottom: 1rem; }
+    .login-field label {
+      display: block;
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(9px, 0.75vw, 11px);
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9a8e84;
+      margin-bottom: 0.3rem;
+    }
+    .login-field input {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid #c2b9a7;
+      border-radius: 4px;
+      font-size: clamp(13px, 1vw, 15px);
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
+      background: #faf8f5;
+      color: #3d3028;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .login-field input:focus {
+      border-color: #7a8c6e;
+      box-shadow: 0 0 0 3px rgba(122, 140, 110, 0.12);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 0.65rem;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      border: none;
+      background: #7a8c6e;
+      color: #faf8f5;
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(9px, 0.85vw, 11px);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: #5a6b50; }
+    .error-msg {
+      display: none;
+      margin-top: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: #f8e8e8;
+      color: #842029;
+      border: 1px solid #f1aeb5;
+      border-radius: 4px;
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.85vw, 13px);
+    }
+  </style>
 </head>
-<body class="layout--center">
-  <main class="card card--wide text--center">
-    <img src="images/Logo.png" alt="YogiTrack Logo" class="logo">
-    <h1>Welcome to YogiTrack</h1>
-    <p>Your all-in-one studio management companion.</p>
+<body>
+  <div class="login-card">
+    <img src="images/Logo.png" alt="YogiTrack Logo">
+    <h1>YogiTrack</h1>
+    <p class="tagline">Studio management by yoga h'om</p>
 
-    <a class="btn btn--primary" href="htmls/dashboard.html">Log&nbsp;in</a>
+    <div class="login-field">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter your username" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+    </div>
 
-    <p class="alt-link">
-      Not an instructor?
-      <a href="https://www.yogahom.com/" target="_blank" rel="noopener noreferrer">
-        Click here to go to YogaH'Om.
-      </a>
-    </p>
+    <button class="login-btn" onclick="doLogin()">Log In</button>
+    <div class="error-msg" id="errorMsg"></div>
+    <a href="https://www.yogahom.com/" class="back-link">← Back to Main Website</a>
+  </div>
 
-  </main>
+  <script>
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      if (!username || !password) {
+        errorMsg.textContent = 'Please enter your username and password.';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          errorMsg.textContent = data.error || 'Invalid username or password.';
+          errorMsg.style.display = 'block';
+          return;
+        }
+
+        window.location.href = data.redirect;
+
+      } catch (err) {
+        errorMsg.textContent = 'Could not connect to server. Please try again.';
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
 </body>
 </html>
