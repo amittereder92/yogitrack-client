@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YogiTrack • Welcome</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: url('images/YogaClass.jpg') center / cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to right,
+        rgba(40,28,20,0.82) 0%,
+        transparent 25%,
+        transparent 75%,
+        rgba(40,28,20,0.82) 100%
+      );
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative;
+      z-index: 1;
+      background: rgba(247, 243, 238, 0.94);
+      backdrop-filter: blur(3px);
+      border: 1px solid rgba(194, 185, 167, 0.4);
+      border-radius: 6px;
+      padding: clamp(2rem, 4vw, 3rem) clamp(2rem, 5vw, 4rem);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 8px 40px rgba(61, 48, 40, 0.15);
+    }
+    .login-card img {
+      width: clamp(80px, 12vw, 140px);
+      height: auto;
+      display: block;
+      margin: 0 auto 1.25rem;
+    }
+    .login-card h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: clamp(20px, 2.5vw, 28px);
+      color: #3d3028;
+      margin: 0 0 0.5rem;
+    }
+    .login-card p {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(12px, 1vw, 14px);
+      color: #9a8e84;
+      letter-spacing: 0.04em;
+      margin: 0 0 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="images/Logo.png" alt="YogiTrack Logo">
+    <h1>Welcome to YogiTrack</h1>
+    <p>Your all-in-one studio management companion.</p>
+    <a class="btn btn--primary" href="htmls/dashboard.html">Log in</a>
+  </div>
+</body>
+</html>
