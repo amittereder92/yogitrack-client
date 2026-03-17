@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // SEARCH
-document.getElementById("searchBtn").addEventListener("click", () => {
+document.getElementById("searchBtn").addEventListener("click", async () => {
   clearCustomerForm();
   setFormForSearch();
   initCustomerDropdown();
@@ -22,34 +22,45 @@ document.getElementById("addBtn").addEventListener("click", () => {
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const form = document.getElementById("customerForm");
 
-  const seniorVal = form.senior.value === "true";
-  const prefContact = document.querySelector('input[name="preferredContact"]:checked')?.value || "phone";
-
   if (formMode === "add") {
     const res = await fetch("/api/customer/getNextId");
     const { nextId } = await res.json();
 
+    // Prompt for password
+    const password = prompt("Set a password for this customer's portal login:");
+    if (!password) { alert("Password is required."); return; }
+    if (password.length < 6) { alert("Password must be at least 6 characters."); return; }
+
+    const senior = form.querySelector('input[name="senior"]:checked');
+    const pref   = form.querySelector('input[name="preferredContact"]:checked');
+
     const customerData = {
-      customerId: nextId,
-      firstName: form.firstName.value.trim(),
-      lastName: form.lastName.value.trim(),
-      address: form.address.value.trim(),
-      phone: form.phone.value.trim(),
-      email: form.email.value.trim(),
-      classBalance: parseInt(form.classBalance.value) || 0,
-      senior: seniorVal,
-      preferredContact: prefContact,
+      customerId:       nextId,
+      firstName:        form.firstName.value.trim(),
+      lastName:         form.lastName.value.trim(),
+      email:            form.email.value.trim(),
+      phone:            form.phone.value.trim(),
+      address:          form.address.value.trim(),
+      senior:           senior ? senior.value === "true" : false,
+      preferredContact: pref ? pref.value : "email",
+      classBalance:     parseInt(form.classBalance.value) || 0,
+      password,
     };
 
+    if (!customerData.firstName || !customerData.lastName) {
+      alert("First and last name are required.");
+      return;
+    }
+
     try {
-      const saveRes = await fetch("/api/customer/add", {
-        method: "POST",
+      const res = await fetch("/api/customer/add", {
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(customerData),
+        body:    JSON.stringify(customerData),
       });
-      const result = await saveRes.json();
-      if (!saveRes.ok) throw new Error(result.message || "Failed to add customer");
-      alert(`✅ Customer ${customerData.customerId} added successfully!`);
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to add customer");
+      alert(`✅ Customer ${nextId} added successfully! They can log in with their email and the password you set.`);
       clearCustomerForm();
       setFormForSearch();
       initCustomerDropdown();
@@ -57,31 +68,34 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       alert("❌ Error: " + err.message);
     }
 
-  } else if (formMode === "edit") {
-    const customerId = document.getElementById("customerIdText").value;
+  } else if (formMode === "search") {
+    const select     = document.getElementById("customerIdSelect");
+    const customerId = select.value;
+    if (!customerId) { alert("Please select a customer to update."); return; }
+
+    const senior = document.getElementById("customerForm").querySelector('input[name="senior"]:checked');
+    const pref   = document.getElementById("customerForm").querySelector('input[name="preferredContact"]:checked');
+
     const customerData = {
-      firstName: form.firstName.value.trim(),
-      lastName: form.lastName.value.trim(),
-      address: form.address.value.trim(),
-      phone: form.phone.value.trim(),
-      email: form.email.value.trim(),
-      classBalance: parseInt(form.classBalance.value) || 0,
-      senior: seniorVal,
-      preferredContact: prefContact,
+      firstName:        document.getElementById("firstName").value.trim(),
+      lastName:         document.getElementById("lastName").value.trim(),
+      email:            document.getElementById("email").value.trim(),
+      phone:            document.getElementById("phone").value.trim(),
+      address:          document.getElementById("address").value.trim(),
+      senior:           senior ? senior.value === "true" : false,
+      preferredContact: pref ? pref.value : "email",
+      classBalance:     parseInt(document.getElementById("classBalance").value) || 0,
     };
 
     try {
-      const updateRes = await fetch(`/api/customer/update?customerId=${customerId}`, {
-        method: "PUT",
+      const res = await fetch(`/api/customer/update?customerId=${customerId}`, {
+        method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(customerData),
+        body:    JSON.stringify(customerData),
       });
-      const result = await updateRes.json();
-      if (!updateRes.ok) throw new Error(result.message || "Failed to update customer");
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to update customer");
       alert(`✅ Customer ${customerId} updated successfully!`);
-      clearCustomerForm();
-      setFormForSearch();
-      initCustomerDropdown();
     } catch (err) {
       alert("❌ Error: " + err.message);
     }
@@ -90,16 +104,16 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
 // DELETE
 document.getElementById("deleteBtn").addEventListener("click", async () => {
-  const customerId = document.getElementById("customerIdSelect").value;
+  const select     = document.getElementById("customerIdSelect");
+  const customerId = select.value;
   if (!customerId) { alert("Please select a customer to delete."); return; }
-  if (!confirm(`Delete customer ${customerId}? This cannot be undone.`)) return;
+  if (!confirm(`Delete customer ${customerId}?`)) return;
 
   try {
     const res = await fetch(`/api/customer/deleteCustomer?customerId=${customerId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Customer delete failed");
+    if (!res.ok) throw new Error("Delete failed");
     alert(`✅ Customer ${customerId} deleted.`);
     clearCustomerForm();
-    setFormForSearch();
     initCustomerDropdown();
   } catch (err) {
     alert("❌ Error: " + err.message);
@@ -108,9 +122,9 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 
 async function initCustomerDropdown() {
   const select = document.getElementById("customerIdSelect");
-  select.innerHTML = '<option value=""> -- Select Customer -- </option>';
+  select.innerHTML = '<option value="">-- Select Customer --</option>';
   try {
-    const res = await fetch("/api/customer/getCustomerIds");
+    const res       = await fetch("/api/customer/getCustomerIds");
     const customers = await res.json();
     customers.forEach((c) => {
       const option = document.createElement("option");
@@ -124,7 +138,7 @@ async function initCustomerDropdown() {
 }
 
 async function addCustomerDropdownListener() {
-  const form = document.getElementById("customerForm");
+  const form   = document.getElementById("customerForm");
   const select = document.getElementById("customerIdSelect");
 
   select.addEventListener("change", async () => {
@@ -135,25 +149,21 @@ async function addCustomerDropdownListener() {
       const res = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
       if (!res.ok) throw new Error("Customer search failed");
       const data = await res.json();
-      if (!data || Object.keys(data).length === 0) { alert("No customer found"); return; }
+      if (!data) { alert("No customer found"); return; }
 
-      form.firstName.value = data.firstName || "";
-      form.lastName.value = data.lastName || "";
-      form.address.value = data.address || "";
-      form.phone.value = data.phone || "";
-      form.email.value = data.email || "";
-      form.classBalance.value = data.classBalance ?? 0;
+      document.getElementById("firstName").value    = data.firstName    || "";
+      document.getElementById("lastName").value     = data.lastName     || "";
+      document.getElementById("email").value        = data.email        || "";
+      document.getElementById("phone").value        = data.phone        || "";
+      document.getElementById("address").value      = data.address      || "";
+      document.getElementById("classBalance").value = data.classBalance || 0;
 
-      // Senior radio
       const seniorRadios = form.querySelectorAll('input[name="senior"]');
-      seniorRadios.forEach(r => r.checked = (r.value === String(data.senior)));
+      seniorRadios.forEach(r => { r.checked = r.value === String(data.senior); });
 
-      // Preferred contact radio
       const prefRadios = form.querySelectorAll('input[name="preferredContact"]');
-      prefRadios.forEach(r => r.checked = (r.value === data.preferredContact));
+      prefRadios.forEach(r => { r.checked = r.value === data.preferredContact; });
 
-      formMode = "edit";
-      document.getElementById("customerIdText").value = customerId;
     } catch (err) {
       alert(`Error loading customer: ${err.message}`);
     }
@@ -162,25 +172,24 @@ async function addCustomerDropdownListener() {
 
 function clearCustomerForm() {
   document.getElementById("customerForm").reset();
-  document.getElementById("customerIdSelect").innerHTML = '<option value=""> -- Select Customer -- </option>';
-  document.getElementById("customerIdText").value = "";
+  document.getElementById("customerIdSelect").innerHTML = '<option value="">-- Select Customer --</option>';
 }
 
 function setFormForSearch() {
   formMode = "search";
-  document.getElementById("customerIdLabel").style.display = "block";
+  document.getElementById("customerIdLabel").style.display     = "block";
   document.getElementById("customerIdTextLabel").style.display = "none";
-  document.getElementById("customerIdText").style.display = "none";
-  document.getElementById("customerIdText").value = "";
+  document.getElementById("customerIdText").style.display      = "none";
+  document.getElementById("customerIdText").value              = "";
+  document.getElementById("addBtn").disabled = false;
   document.getElementById("customerForm").reset();
 }
 
 function setFormForAdd() {
   formMode = "add";
-  document.getElementById("customerIdLabel").style.display = "none";
+  document.getElementById("customerIdLabel").style.display     = "none";
   document.getElementById("customerIdTextLabel").style.display = "block";
-  document.getElementById("customerIdText").removeAttribute("hidden");
-  document.getElementById("customerIdText").style.display = "block";
-  document.getElementById("customerIdText").value = "Auto-generated";
+  document.getElementById("customerIdText").value              = "";
+  document.getElementById("addBtn").disabled = true;
   document.getElementById("customerForm").reset();
 }

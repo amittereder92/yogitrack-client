@@ -1,5 +1,6 @@
-const bcrypt = require("bcryptjs");
-const User = require("../models/userModel.cjs");
+const bcrypt   = require("bcryptjs");
+const User     = require("../models/userModel.cjs");
+const Customer = require("../models/customerModel.cjs");
 
 // POST /api/auth/login
 const login = async (req, res) => {
@@ -11,7 +12,22 @@ const login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ username: username.trim().toLowerCase() });
+    // Try finding user by username first, then by email (for customers)
+    let user = await User.findOne({ username: username.trim().toLowerCase() });
+
+    // If not found by username, try email match
+    if (!user) {
+      user = await User.findOne({ username: username.trim().toLowerCase().replace('@', '_at_') });
+    }
+
+    // If still not found, check if it's a customer email
+    if (!user) {
+      const customer = await Customer.findOne({ email: username.trim().toLowerCase() });
+      if (customer) {
+        user = await User.findOne({ customerId: customer.customerId, role: 'customer' });
+      }
+    }
+
     console.log("User found:", user ? user.username : "NOT FOUND");
 
     if (!user) {
@@ -36,7 +52,7 @@ const login = async (req, res) => {
     return res.json({
       success:  true,
       role:     user.role,
-      redirect: "/htmls/dashboard.html",
+      redirect: user.role === "staff" ? "/htmls/dashboard.html" : "/htmls/customer-portal.html",
     });
 
   } catch (err) {

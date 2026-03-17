@@ -1,4 +1,5 @@
 const Customer = require("../models/customerModel.cjs");
+const User     = require("../models/userModel.cjs");
 
 exports.getCustomer = async (req, res) => {
   try {
@@ -39,10 +40,32 @@ exports.getNextId = async (req, res) => {
 
 exports.add = async (req, res) => {
   try {
-    const { customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance } = req.body;
-    if (!firstName || !lastName) return res.status(400).json({ message: "Missing required fields" });
+    const { customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance, password } = req.body;
+
+    if (!firstName || !lastName) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Create customer record
     const newCustomer = new Customer({ customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance });
     await newCustomer.save();
+
+    // Create user account for portal login if password and email provided
+    if (password && email) {
+      const username = email.trim().toLowerCase();
+      const existingUser = await User.findOne({ username });
+      if (!existingUser) {
+        const newUser = new User({
+          username,
+          password,
+          role:        "customer",
+          customerId,
+          displayName: `${firstName} ${lastName}`,
+        });
+        await newUser.save();
+      }
+    }
+
     res.status(201).json({ message: "Customer added successfully", customer: newCustomer });
   } catch (err) {
     res.status(500).json({ message: "Failed to add customer", error: err.message });
@@ -70,6 +93,8 @@ exports.deleteCustomer = async (req, res) => {
     const { customerId } = req.query;
     const result = await Customer.findOneAndDelete({ customerId });
     if (!result) return res.status(404).json({ error: "Customer not found" });
+    // Also delete their user account
+    await User.findOneAndDelete({ customerId });
     res.json({ message: "Customer deleted", customerId });
   } catch (err) {
     res.status(500).json({ error: err.message });

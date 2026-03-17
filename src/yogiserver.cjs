@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require("express");
 const session = require("express-session");
 const app     = express();
@@ -15,18 +14,20 @@ app.use(session({
   resave:            false,
   saveUninitialized: false,
   cookie: {
-    secure:   false, // set to true if using HTTPS in production
+    secure:   false,
     httpOnly: true,
-    maxAge:   1000 * 60 * 60 * 8, // 8 hours
+    maxAge:   1000 * 60 * 60 * 8,
   }
 }));
 
 // Routes
 app.use("/api/auth",       require("./routes/authRoutes.cjs"));
+app.use("/api/portal",     require("./routes/customerPortalRoutes.cjs"));
 app.use("/api/instructor", require("./routes/instructorRoutes.cjs"));
 app.use("/api/package",    require("./routes/packageRoutes.cjs"));
 app.use("/api/schedule",   require("./routes/scheduleRoutes.cjs"));
 app.use("/api/customer",   require("./routes/customerRoutes.cjs"));
+app.use("/api/checkin",    require("./routes/checkinRoutes.cjs"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");

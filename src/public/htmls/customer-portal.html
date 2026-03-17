@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YogiTrack • My Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .portal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .portal-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid rgba(194,185,167,0.4);
+      box-shadow: 0 2px 12px rgba(61,48,40,0.06);
+    }
+    .portal-card h3 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(14px, 1.2vw, 18px);
+      color: #3d3028;
+      margin: 0 0 12px;
+      font-weight: 400;
+    }
+    .balance-number {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      color: #7a8c6e;
+      font-weight: 300;
+      line-height: 1;
+    }
+    .balance-label {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(9px, 0.8vw, 11px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9a8e84;
+      margin-top: 4px;
+    }
+    .balance-low { color: #b5724a; }
+    .balance-empty { color: #842029; }
+
+    .checkin-list { list-style: none; margin: 0; padding: 0; }
+    .checkin-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(237,232,224,0.9);
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+    }
+    .checkin-item:last-child { border-bottom: none; }
+    .checkin-class { color: #3d3028; }
+    .checkin-date { color: #9a8e84; font-size: clamp(10px, 0.8vw, 12px); }
+
+    .schedule-list { list-style: none; margin: 0; padding: 0; }
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(237,232,224,0.9);
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+    }
+    .schedule-item:last-child { border-bottom: none; }
+    .schedule-name { color: #3d3028; }
+    .schedule-time { color: #9a8e84; font-size: clamp(10px, 0.8vw, 12px); }
+    .schedule-type {
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: #e4ede0;
+      color: #3d6b2e;
+      font-family: 'Lato', sans-serif;
+      letter-spacing: 0.06em;
+    }
+
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(237,232,224,0.9);
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+    }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-label { color: #9a8e84; }
+    .profile-value { color: #3d3028; }
+
+    .empty-msg {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+      color: #9a8e84;
+      font-style: italic;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    .welcome-name {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(18px, 2vw, 24px);
+      color: #3d3028;
+      font-weight: 300;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <a class="wing-brand" href="customer-portal.html">
+      <img src="../images/Logo.png" alt="YogiTrack Logo">
+      <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">My Portal</span>
+    </a>
+
+    <div class="center-col">
+      <nav class="topnav">
+        <div class="nav-links">
+          <a href="customer-portal.html" class="active">Dashboard</a>
+          <a href="#" onclick="showSection('schedule')">Schedule</a>
+          <a href="#" onclick="showSection('profile')">My Profile</a>
+        </div>
+        <a href="../index.html" class="nav-logout" onclick="doLogout()">Log out</a>
+      </nav>
+
+      <div class="content-panel" id="dashboardSection">
+        <div class="welcome-name" id="welcomeName">Welcome back</div>
+
+        <div class="portal-grid">
+          <!-- Class Balance -->
+          <div class="portal-card">
+            <h3>Class Balance</h3>
+            <div class="balance-number" id="balanceNumber">—</div>
+            <div class="balance-label" id="balanceLabel">classes remaining</div>
+          </div>
+
+          <!-- Recent Check-ins -->
+          <div class="portal-card">
+            <h3>Recent Check-ins</h3>
+            <ul class="checkin-list" id="checkinList">
+              <li class="empty-msg">Loading...</li>
+            </ul>
+          </div>
+
+          <!-- Upcoming Schedule -->
+          <div class="portal-card" style="grid-column: 1 / -1;">
+            <h3>Upcoming Classes</h3>
+            <ul class="schedule-list" id="scheduleList">
+              <li class="empty-msg">Loading...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Section -->
+      <div class="content-panel" id="profileSection" style="display:none;">
+        <form class="card card--wide" id="profileForm">
+          <h2>My Profile</h2>
+          <div class="grid-2">
+            <label>First Name <input type="text" id="profileFirstName"></label>
+            <label>Last Name  <input type="text" id="profileLastName"></label>
+          </div>
+          <label>Address <textarea id="profileAddress" rows="2"></textarea></label>
+          <div class="grid-2">
+            <label>Phone <input type="tel" id="profilePhone"></label>
+            <label>Email <input type="email" id="profileEmail" readonly style="background:#f0ebe4;"></label>
+          </div>
+          <fieldset>
+            <legend>Preferred Contact</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="profilePref" value="phone"> Phone</label>
+              <label><input type="radio" name="profilePref" value="email"> Email</label>
+            </div>
+          </fieldset>
+          <div class="btn-row">
+            <button type="button" class="btn btn--primary" onclick="saveProfile()">Save Changes</button>
+            <button type="button" class="btn" onclick="showSection('dashboard')">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Schedule Section -->
+      <div class="content-panel" id="scheduleSection" style="display:none;">
+        <div class="card card--wide">
+          <h2>Class Schedule</h2>
+          <ul class="schedule-list" id="fullScheduleList">
+            <li class="empty-msg">Loading...</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let currentCustomer = null;
+
+    async function init() {
+      try {
+        const res  = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (!data.loggedIn || data.user.role !== 'customer') {
+          window.location.href = '/index.html';
+          return;
+        }
+
+        const custRes  = await fetch(`/api/portal/me`);
+        currentCustomer = await custRes.json();
+
+        // Welcome name
+        document.getElementById('welcomeName').textContent = `Welcome back, ${currentCustomer.firstName} ☀︎`;
+
+        // Balance
+        const bal   = currentCustomer.classBalance || 0;
+        const balEl = document.getElementById('balanceNumber');
+        const lblEl = document.getElementById('balanceLabel');
+        balEl.textContent = bal;
+        if (bal === 0) { balEl.classList.add('balance-empty'); lblEl.textContent = 'no classes remaining'; }
+        else if (bal <= 2) { balEl.classList.add('balance-low'); lblEl.textContent = 'classes remaining — renew soon'; }
+
+        // Load checkins
+        loadCheckins();
+        // Load schedule
+        loadSchedule();
+
+      } catch (err) {
+        console.error('Portal init error:', err);
+        window.location.href = '/index.html';
+      }
+    }
+
+    async function loadCheckins() {
+      try {
+        const res      = await fetch('/api/portal/checkins');
+        const checkins = await res.json();
+        const list     = document.getElementById('checkinList');
+
+        if (!checkins.length) {
+          list.innerHTML = '<li class="empty-msg">No check-ins yet.</li>';
+          return;
+        }
+
+        list.innerHTML = checkins.slice(0, 5).map(c => {
+          const dt = new Date(c.checkinDatetime);
+          const formatted = dt.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+          return `<li class="checkin-item">
+            <span class="checkin-class">${c.classId}</span>
+            <span class="checkin-date">${formatted}</span>
+          </li>`;
+        }).join('');
+      } catch (err) {
+        console.error('Failed to load checkins:', err);
+      }
+    }
+
+    async function loadSchedule() {
+      try {
+        const res     = await fetch('/api/schedule/getClassIds');
+        const classes = await res.json();
+        const list    = document.getElementById('scheduleList');
+        const fullList = document.getElementById('fullScheduleList');
+
+        if (!classes.length) {
+          list.innerHTML = '<li class="empty-msg">No classes scheduled.</li>';
+          fullList.innerHTML = '<li class="empty-msg">No classes scheduled.</li>';
+          return;
+        }
+
+        const html = classes.slice(0, 4).map(c =>
+          `<li class="schedule-item">
+            <span class="schedule-name">${c.className}</span>
+            <span class="schedule-type">${c.classType || 'General'}</span>
+          </li>`
+        ).join('');
+
+        const fullHtml = classes.map(c =>
+          `<li class="schedule-item">
+            <span class="schedule-name">${c.className}</span>
+            <span class="schedule-type">${c.classType || 'General'}</span>
+          </li>`
+        ).join('');
+
+        list.innerHTML     = html;
+        fullList.innerHTML = fullHtml;
+      } catch (err) {
+        console.error('Failed to load schedule:', err);
+      }
+    }
+
+    async function saveProfile() {
+      try {
+        const pref = document.querySelector('input[name="profilePref"]:checked');
+        const body = {
+          firstName:        document.getElementById('profileFirstName').value.trim(),
+          lastName:         document.getElementById('profileLastName').value.trim(),
+          phone:            document.getElementById('profilePhone').value.trim(),
+          address:          document.getElementById('profileAddress').value.trim(),
+          preferredContact: pref ? pref.value : 'email',
+        };
+        const res = await fetch('/api/portal/update', {
+          method:  'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error('Update failed');
+        alert('✅ Profile updated!');
+        showSection('dashboard');
+        init();
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    function showSection(section) {
+      document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'flex' : 'none';
+      document.getElementById('profileSection').style.display   = section === 'profile'   ? 'flex' : 'none';
+      document.getElementById('scheduleSection').style.display  = section === 'schedule'  ? 'flex' : 'none';
+
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      if (section === 'dashboard') document.querySelectorAll('.nav-links a')[0].classList.add('active');
+      if (section === 'schedule')  document.querySelectorAll('.nav-links a')[1].classList.add('active');
+      if (section === 'profile')   document.querySelectorAll('.nav-links a')[2].classList.add('active');
+
+      if (section === 'profile' && currentCustomer) {
+        document.getElementById('profileFirstName').value = currentCustomer.firstName || '';
+        document.getElementById('profileLastName').value  = currentCustomer.lastName  || '';
+        document.getElementById('profilePhone').value     = currentCustomer.phone     || '';
+        document.getElementById('profileAddress').value   = currentCustomer.address   || '';
+        document.getElementById('profileEmail').value     = currentCustomer.email     || '';
+        const pref = currentCustomer.preferredContact;
+        document.querySelectorAll('input[name="profilePref"]').forEach(r => {
+          r.checked = r.value === pref;
+        });
+      }
+    }
+
+    async function doLogout() {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/index.html';
+    }
+
+    init();
+  </script>
+</body>
+</html>
