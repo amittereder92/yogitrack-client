@@ -13,6 +13,7 @@
     <a class="wing-brand" href="dashboard.html">
       <img src="../images/Logo.png" alt="YogiTrack Logo">
       <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
     </a>
 
     <div class="center-col">
@@ -26,7 +27,7 @@
           <a href="customer.html">Customers</a>
           <a href="checkin.html">Check-ins</a>
         </div>
-        <a href="../index.html" class="nav-logout">Log out</a>
+        <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
 
       <div class="content-panel">
@@ -44,25 +45,15 @@
           </label>
 
           <div class="grid-2">
-            <label>First Name
-              <input type="text" name="firstname">
-            </label>
-            <label>Last Name
-              <input type="text" name="lastname">
-            </label>
+            <label>First Name <input type="text" name="firstname"></label>
+            <label>Last Name  <input type="text" name="lastname"></label>
           </div>
 
-          <label>Address
-            <textarea name="address" rows="2"></textarea>
-          </label>
+          <label>Address <textarea name="address" rows="2"></textarea></label>
 
           <div class="grid-2">
-            <label>Phone
-              <input type="tel" name="phone">
-            </label>
-            <label>Email
-              <input type="email" name="email">
-            </label>
+            <label>Phone <input type="tel" name="phone"></label>
+            <label>Email <input type="email" name="email"></label>
           </div>
 
           <fieldset>
@@ -87,6 +78,20 @@
     </div>
   </div>
 
+  <script>
+    (async function() {
+      const res  = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (!data.loggedIn || data.user.role !== 'staff') {
+        window.location.href = '/index.html';
+      }
+    })();
+
+    function doLogout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(() => window.location.href = '/index.html');
+    }
+  </script>
   <script src="../js/instructor.js"></script>
 </body>
 </html>

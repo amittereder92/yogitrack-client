@@ -13,6 +13,7 @@
     <a class="wing-brand" href="dashboard.html">
       <img src="../images/Logo.png" alt="YogiTrack Logo">
       <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
     </a>
 
     <div class="center-col">
@@ -26,7 +27,7 @@
           <a href="customer.html">Customers</a>
           <a href="checkin.html">Check-ins</a>
         </div>
-        <a href="../index.html" class="nav-logout">Log out</a>
+        <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
 
       <div class="content-panel">
@@ -42,17 +43,9 @@
           <label id="packageIdTextLabel" style="display:none;">Package ID</label>
           <input type="text" id="packageIdText" name="packageId" readonly hidden />
 
-          <label>Package Name
-            <input type="text" name="packageName" id="packageName">
-          </label>
-
-          <label>Description
-            <textarea name="description" id="description" rows="2"></textarea>
-          </label>
-
-          <label>Price ($)
-            <input type="number" name="price" id="price" step="0.01" min="0">
-          </label>
+          <label>Package Name <input type="text" name="packageName" id="packageName"></label>
+          <label>Description  <textarea name="description" id="description" rows="2"></textarea></label>
+          <label>Price ($)    <input type="number" name="price" id="price" step="0.01" min="0"></label>
 
           <div class="btn-row">
             <button type="button" class="btn" id="searchBtn">Search</button>
@@ -68,6 +61,20 @@
     </div>
   </div>
 
+  <script>
+    (async function() {
+      const res  = await fetch('/api/auth/me');
+      const data = await res.json();
+      if (!data.loggedIn || data.user.role !== 'staff') {
+        window.location.href = '/index.html';
+      }
+    })();
+
+    function doLogout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(() => window.location.href = '/index.html');
+    }
+  </script>
   <script src="../js/package.js"></script>
 </body>
 </html>
