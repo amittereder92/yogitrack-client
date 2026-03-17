@@ -1,8 +1,10 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/userModel.cjs");
 
 // POST /api/auth/login
 const login = async (req, res) => {
   const { username, password } = req.body;
+  console.log("Login attempt for:", username);
 
   if (!username || !password) {
     return res.status(400).json({ error: "Username and password are required." });
@@ -10,16 +12,19 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ username: username.trim().toLowerCase() });
+    console.log("User found:", user ? user.username : "NOT FOUND");
+
     if (!user) {
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
-    const match = await user.comparePassword(password);
+    const match = await bcrypt.compare(password, user.password);
+    console.log("Password match:", match);
+
     if (!match) {
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
-    // Store user info in session
     req.session.user = {
       id:          user._id,
       username:    user.username,
@@ -29,9 +34,9 @@ const login = async (req, res) => {
     };
 
     return res.json({
-      success: true,
-      role:    user.role,
-      redirect: user.role === "staff" ? "/htmls/dashboard.html" : "/htmls/customer-portal.html",
+      success:  true,
+      role:     user.role,
+      redirect: "/htmls/dashboard.html",
     });
 
   } catch (err) {
@@ -47,7 +52,7 @@ const logout = (req, res) => {
   });
 };
 
-// GET /api/auth/me — check who is logged in
+// GET /api/auth/me
 const me = (req, res) => {
   if (req.session.user) {
     return res.json({ loggedIn: true, user: req.session.user });
@@ -55,13 +60,13 @@ const me = (req, res) => {
   return res.json({ loggedIn: false });
 };
 
-// Middleware — protect staff-only pages
+// Middleware — staff only
 const requireStaff = (req, res, next) => {
   if (req.session.user && req.session.user.role === "staff") return next();
   return res.status(403).json({ error: "Staff access required." });
 };
 
-// Middleware — protect any logged-in user
+// Middleware — any logged in user
 const requireLogin = (req, res, next) => {
   if (req.session.user) return next();
   return res.status(401).json({ error: "Please log in." });
