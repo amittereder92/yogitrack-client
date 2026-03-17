@@ -2,83 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Class Schedule</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="layout--sidebar">
-  <aside class="sidebar">
-    <a class="logo-wrap" href="dashboard.html">
-      <img src="../images/Logo.png" alt="YogiTrack Logo" class="logo">
+<body>
+
+  <div class="page-shell">
+
+    <a class="wing-brand" href="dashboard.html">
+      <img src="../images/Logo.png" alt="YogiTrack Logo">
+      <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
     </a>
-    <nav class="nav">
-      <a href="instructor.html">Instructors</a>
-      <a href="package.html">Packages</a>
-      <a href="schedule.html" class="active">Class Schedule</a>
-      <a href="customer.html">Customers</a>
-      <a href="checkin.html">Check-ins</a>
-      <a href="../index.html">Log Out</a>
-    </nav>
-  </aside>
 
-  <main class="layout--center">
-    <form class="card card--wide" id="scheduleForm">
-      <h2>Class Schedule</h2>
+    <div class="center-col">
 
-      <!-- Class ID dropdown (search mode) -->
-      <label id="classIdLabel" for="classIdSelect">Class ID
-        <select name="classId" id="classIdSelect" class="form-input">
-          <option value=""> -- Select Class -- </option>
-        </select>
-      </label>
-
-      <!-- Class ID text (add mode) -->
-      <label id="classIdTextLabel" style="display:none;">Class ID</label>
-      <input type="text" id="classIdText" name="classId" readonly hidden />
-
-      <div class="grid-2">
-        <label>Class Name
-          <input type="text" name="className" id="className">
-        </label>
-        <label>Class Type
-          <select name="classType" id="classType" class="form-input styled-select">
-            <option value="">-- Select Type --</option>
-            <option value="General">General</option>
-            <option value="Special">Special</option>
-            <option value="Prenatal">Prenatal</option>
-            <option value="Private">Private</option>
-          </select>
-        </label>
-      </div>
-
-      <label>Instructor
-        <select name="instructorId" id="instructorId" class="form-input styled-select">
-          <option value="">-- Select Instructor --</option>
-        </select>
-      </label>
-
-      <label>Description
-        <textarea name="description" id="description" rows="2"></textarea>
-      </label>
-
-      <!-- Day/Time Schedule -->
-      <fieldset>
-        <legend>Schedule</legend>
-        <div id="daytimeList">
-          <!-- rows added dynamically -->
+      <nav class="topnav">
+        <div class="nav-links">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="instructor.html">Instructors</a>
+          <a href="package.html">Packages</a>
+          <a href="schedule.html" class="active">Schedule</a>
+          <a href="customer.html">Customers</a>
+          <a href="checkin.html">Check-ins</a>
         </div>
-        <button type="button" class="btn btn--outline" id="addDaytimeBtn" style="margin-top:.75rem;">+ Add Day/Time</button>
-      </fieldset>
+        <a href="../index.html" class="nav-logout">Log out</a>
+      </nav>
 
-      <div class="btn-row">
-        <button type="button" class="btn" id="searchBtn">Search</button>
-        <button type="button" class="btn btn--primary" id="addBtn">Add&nbsp;New</button>
-        <button type="button" class="btn" id="saveBtn">Save</button>
-        <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
-        <button type="button" class="btn" onclick="clearScheduleForm()">Clear</button>
-        <a href="dashboard.html" class="btn">Exit</a>
+      <div class="content-panel">
+        <form class="card card--wide" id="scheduleForm">
+          <h2>Class Schedule</h2>
+
+          <label id="classIdLabel" for="classIdSelect">Class ID
+            <select name="classId" id="classIdSelect" class="form-input">
+              <option value="">-- Select Class --</option>
+            </select>
+          </label>
+
+          <label id="classIdTextLabel" style="display:none;">Class ID</label>
+          <input type="text" id="classIdText" name="classId" readonly hidden />
+
+          <div class="grid-2">
+            <label>Class Name
+              <input type="text" name="className" id="className">
+            </label>
+            <label>Class Type
+              <select name="classType" id="classType" class="form-input styled-select">
+                <option value="">-- Select Type --</option>
+                <option value="General">General</option>
+                <option value="Special">Special</option>
+                <option value="Prenatal">Prenatal</option>
+                <option value="Private">Private</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Instructor
+            <select name="instructorId" id="instructorId" class="form-input styled-select">
+              <option value="">-- Select Instructor --</option>
+            </select>
+          </label>
+
+          <label>Description
+            <textarea name="description" id="description" rows="2"></textarea>
+          </label>
+
+          <fieldset>
+            <legend>Schedule</legend>
+            <div id="daytimeList"></div>
+            <button type="button" class="btn" id="addDaytimeBtn" style="margin-top:.75rem;">+ Add Day/Time</button>
+          </fieldset>
+
+          <div class="btn-row">
+            <button type="button" class="btn" id="searchBtn">Search</button>
+            <button type="button" class="btn btn--primary" id="addBtn">Add New</button>
+            <button type="button" class="btn" id="saveBtn">Save</button>
+            <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
+            <button type="button" class="btn" onclick="clearScheduleForm()">Clear</button>
+            <a href="dashboard.html" class="btn">Exit</a>
+          </div>
+        </form>
       </div>
-    </form>
-  </main>
+
+    </div>
+  </div>
 
   <script src="../js/schedule.js"></script>
 </body>

@@ -2,40 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Dashboard</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-
 <body>
-  <div class="background">
-    <div class="overlay">
-      <div class="layout--sidebar">
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-          <a class="logo-wrap" href="dashboard.html">
-            <img src="../images/Logo.png" alt="YogiTrack Logo" class="logo">
-          </a>
-          <nav class="nav">
-            <a href="instructor.html">Instructors</a>
-            <a href="package.html">Packages</a>
-            <a href="schedule.html">Class Schedule</a>
-            <a href="customer.html">Customers</a>
-            <a href="checkin.html">Check-ins</a>
-            <a href="../index.html">Log Out</a>
-          </nav>
-        </aside>
+  <div class="page-shell">
 
-        <!-- Main content -->
-        <main class="main-bg">
-          <div class="welcome-box">
-            <img src="../images/Logo.png" alt="YogiTrack Logo" class="logo" style="height:80px; margin-bottom:1rem;">
-            <h1>Welcome to YogiTrack</h1>
-            <p>Select a section from the sidebar to get started.</p>
-          </div>
-        </main>
+    <!-- YogiTrack brand on left wing — links to dashboard -->
+    <a class="wing-brand" href="dashboard.html">
+      <img src="../images/Logo.png" alt="YogiTrack Logo">
+      <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
+    </a>
 
+    <!-- Center column -->
+    <div class="center-col">
+
+      <!-- Top nav -->
+      <nav class="topnav">
+        <div class="nav-links">
+          <a href="dashboard.html" class="active">Dashboard</a>
+          <a href="instructor.html">Instructors</a>
+          <a href="package.html">Packages</a>
+          <a href="schedule.html">Schedule</a>
+          <a href="customer.html">Customers</a>
+          <a href="checkin.html">Check-ins</a>
+        </div>
+        <a href="../index.html" class="nav-logout">Log out</a>
+      </nav>
+
+      <!-- Scrollable content -->
+      <div class="content-panel">
+        <div class="welcome-box">
+          <img src="../images/Logo.png" alt="YogiTrack Logo">
+          <h1>Welcome to YogiTrack</h1>
+          <p>Select a section from the navigation above to get started.</p>
+        </div>
       </div>
+
     </div>
   </div>
 

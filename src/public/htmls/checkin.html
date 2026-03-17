@@ -2,182 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Check-ins</title>
   <link rel="stylesheet" href="../css/style.css">
-  <style>
-    .table-wrap {
-      width: 100%;
-      max-width: 900px;
-      background: #fff;
-      border-radius: .75rem;
-      box-shadow: 0 4px 14px rgba(0,0,0,.06);
-      overflow: hidden;
-    }
-
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid #eee;
-      flex-wrap: wrap;
-      gap: .75rem;
-    }
-
-    .table-header h2 { margin: 0; font-size: 1.1rem; color: #05713d; }
-
-    .search-bar {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-    }
-
-    .search-bar input,
-    .search-bar select {
-      padding: .45rem .75rem;
-      border: 1px solid #ccc;
-      border-radius: .5rem;
-      font-size: .88rem;
-      margin-top: 0;
-      width: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .9rem;
-    }
-
-    thead { background: #008080; color: #fff; }
-    thead th { padding: .75rem 1rem; text-align: left; white-space: nowrap; }
-
-    tbody tr { border-bottom: 1px solid #f0f0f0; transition: background .12s; }
-    tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: #f0faf8; }
-    tbody td { padding: .65rem 1rem; vertical-align: middle; }
-
-    .badge {
-      display: inline-block;
-      padding: .18rem .55rem;
-      border-radius: 99px;
-      font-size: .76rem;
-      font-weight: 600;
-    }
-    .badge--valid   { background: #d4f0e8; color: #05713d; }
-    .badge--expired { background: #f8d7da; color: #842029; }
-    .badge--low     { background: #fef3cd; color: #856404; }
-
-    .empty-state {
-      text-align: center;
-      padding: 2.5rem;
-      color: #aaa;
-      font-size: .95rem;
-    }
-
-    #validationBanner {
-      display: none;
-      padding: .65rem 1rem;
-      border-radius: .5rem;
-      font-size: .9rem;
-      margin-bottom: .5rem;
-      width: 100%;
-    }
-    #validationBanner.ok   { background: #d4f0e8; color: #05713d; border: 1px solid #a8dbc9; }
-    #validationBanner.warn { background: #fef3cd; color: #856404; border: 1px solid #f5d87a; }
-    #validationBanner.err  { background: #f8d7da; color: #842029; border: 1px solid #f1aeb5; }
-  </style>
 </head>
-<body class="layout--sidebar">
+<body>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <a class="logo-wrap" href="dashboard.html">
-      <img src="../images/Logo.png" alt="YogiTrack Logo" class="logo">
+  <div class="page-shell">
+
+    <a class="wing-brand" href="dashboard.html">
+      <img src="../images/Logo.png" alt="YogiTrack Logo">
+      <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
     </a>
-    <nav class="nav">
-      <a href="instructor.html">Instructors</a>
-      <a href="package.html">Packages</a>
-      <a href="schedule.html">Class Schedule</a>
-      <a href="customer.html">Customers</a>
-      <a href="checkin.html" class="active">Check-ins</a>
-      <a href="../index.html">Log Out</a>
-    </nav>
-  </aside>
 
-  <!-- Main -->
-  <main class="layout--center" style="flex-direction:column; align-items:center; gap:1.5rem; padding:2rem;">
+    <div class="center-col">
 
-    <!-- Log New Check-in Form -->
-    <form class="card card--wide" id="checkinForm" style="width:100%; max-width:900px;">
-      <h2>Log Check-in</h2>
-
-      <div class="grid-2">
-        <label>Customer
-          <select name="customerId" id="customerSelect" class="form-input styled-select" required>
-            <option value="">-- Select Customer --</option>
-          </select>
-        </label>
-        <label>Class
-          <select name="classId" id="classSelect" class="form-input styled-select" required>
-            <option value="">-- Select Class --</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="grid-2">
-        <label>Instructor
-          <select name="instructorId" id="instructorSelect" class="form-input styled-select" required>
-            <option value="">-- Select Instructor --</option>
-          </select>
-        </label>
-        <label>Date &amp; Time
-          <input type="datetime-local" name="checkinDatetime" id="checkinDatetime" required>
-        </label>
-      </div>
-
-      <!-- Package validation banner -->
-      <div id="validationBanner"></div>
-
-      <div class="btn-row">
-        <button type="button" class="btn btn--primary" id="saveCheckinBtn">Save Check-in</button>
-        <button type="button" class="btn" onclick="clearCheckinForm()">Clear</button>
-        <a href="dashboard.html" class="btn">Exit</a>
-      </div>
-    </form>
-
-    <!-- Past Check-ins Table -->
-    <div class="table-wrap">
-      <div class="table-header">
-        <h2>Past Check-ins</h2>
-        <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Search customer or class…" oninput="renderTable()">
-          <select id="filterInstructor" onchange="renderTable()">
-            <option value="">All Instructors</option>
-          </select>
-          <input type="date" id="filterDate" onchange="renderTable()">
+      <nav class="topnav">
+        <div class="nav-links">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="instructor.html">Instructors</a>
+          <a href="package.html">Packages</a>
+          <a href="schedule.html">Schedule</a>
+          <a href="customer.html">Customers</a>
+          <a href="checkin.html" class="active">Check-ins</a>
         </div>
+        <a href="../index.html" class="nav-logout">Log out</a>
+      </nav>
+
+      <div class="content-panel">
+
+        <!-- Log New Check-in Form -->
+        <form class="card card--wide" id="checkinForm">
+          <h2>Log Check-in</h2>
+
+          <div class="grid-2">
+            <label>Customer
+              <select name="customerId" id="customerSelect" class="form-input styled-select" required>
+                <option value="">-- Select Customer --</option>
+              </select>
+            </label>
+            <label>Class
+              <select name="classId" id="classSelect" class="form-input styled-select" required>
+                <option value="">-- Select Class --</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label>Instructor
+              <select name="instructorId" id="instructorSelect" class="form-input styled-select" required>
+                <option value="">-- Select Instructor --</option>
+              </select>
+            </label>
+            <label>Date &amp; Time
+              <input type="datetime-local" name="checkinDatetime" id="checkinDatetime" required>
+            </label>
+          </div>
+
+          <div id="validationBanner"></div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn--primary" id="saveCheckinBtn">Save Check-in</button>
+            <button type="button" class="btn" onclick="clearCheckinForm()">Clear</button>
+            <a href="dashboard.html" class="btn">Exit</a>
+          </div>
+        </form>
+
+        <!-- Past Check-ins Table -->
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>Past Check-ins</h2>
+            <div class="search-bar">
+              <input type="text" id="searchInput" placeholder="Search customer or class…" oninput="renderTable()">
+              <select id="filterInstructor" onchange="renderTable()">
+                <option value="">All Instructors</option>
+              </select>
+              <input type="date" id="filterDate" onchange="renderTable()">
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Class</th>
+                <th>Instructor</th>
+                <th>Date &amp; Time</th>
+                <th>Package Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="checkinTableBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" style="display:none;">No check-ins found.</div>
+        </div>
+
       </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Class</th>
-            <th>Instructor</th>
-            <th>Date &amp; Time</th>
-            <th>Package Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="checkinTableBody"></tbody>
-      </table>
-      <div id="emptyState" class="empty-state" style="display:none;">No check-ins found.</div>
     </div>
-
-  </main>
+  </div>
 
   <script>
-    // ── Seed data — replace with real DB/API calls ───────────────────────────
     const CUSTOMERS = [
       { id: 'C001', name: 'Alice Martin',  balance: 8  },
       { id: 'C002', name: 'Ben Torres',    balance: 1  },
@@ -186,10 +111,10 @@
     ];
 
     const CLASSES = [
-      { id: 'CL01', name: 'Morning Flow'   },
-      { id: 'CL02', name: 'Power Vinyasa'  },
-      { id: 'CL03', name: 'Prenatal Yoga'  },
-      { id: 'CL04', name: 'Restorative'    },
+      { id: 'CL01', name: 'Morning Flow'  },
+      { id: 'CL02', name: 'Power Vinyasa' },
+      { id: 'CL03', name: 'Prenatal Yoga' },
+      { id: 'CL04', name: 'Restorative'   },
     ];
 
     const INSTRUCTORS = [
@@ -200,7 +125,6 @@
 
     let checkins = JSON.parse(localStorage.getItem('yogiCheckins') || '[]');
 
-    // ── Populate dropdowns ───────────────────────────────────────────────────
     function populateDropdowns() {
       const cSel = document.getElementById('customerSelect');
       CUSTOMERS.forEach(c => {
@@ -218,8 +142,8 @@
         clSel.appendChild(o);
       });
 
-      const iSel     = document.getElementById('instructorSelect');
-      const iFilter  = document.getElementById('filterInstructor');
+      const iSel    = document.getElementById('instructorSelect');
+      const iFilter = document.getElementById('filterInstructor');
       INSTRUCTORS.forEach(i => {
         const o = document.createElement('option');
         o.value = i.id;
@@ -228,21 +152,17 @@
         iFilter.appendChild(o);
       });
 
-      // Default datetime to now
       const now = new Date();
       now.setSeconds(0, 0);
       document.getElementById('checkinDatetime').value = now.toISOString().slice(0, 16);
     }
 
-    // ── Package validation banner ────────────────────────────────────────────
     function validatePackage() {
       const customerId = document.getElementById('customerSelect').value;
       const banner = document.getElementById('validationBanner');
       if (!customerId) { banner.style.display = 'none'; return; }
-
       const customer = CUSTOMERS.find(c => c.id === customerId);
       banner.style.display = 'block';
-
       if (customer.balance === 0) {
         banner.className = 'err';
         banner.textContent = `⚠ ${customer.name} has no remaining classes. Please update their package before checking in.`;
@@ -257,44 +177,34 @@
 
     document.getElementById('customerSelect').addEventListener('change', validatePackage);
 
-    // ── Save check-in ────────────────────────────────────────────────────────
     document.getElementById('saveCheckinBtn').addEventListener('click', () => {
       const customerId   = document.getElementById('customerSelect').value;
       const classId      = document.getElementById('classSelect').value;
       const instructorId = document.getElementById('instructorSelect').value;
       const datetime     = document.getElementById('checkinDatetime').value;
-
       if (!customerId || !classId || !instructorId || !datetime) {
         alert('Please fill in all fields before saving.');
         return;
       }
-
       const customer = CUSTOMERS.find(c => c.id === customerId);
       if (customer.balance === 0) {
         if (!confirm(`${customer.name} has no remaining classes. Save check-in anyway?`)) return;
       }
-
       const checkin = {
-        id:             Date.now(),
-        customerId,     classId,      instructorId,  datetime,
+        id: Date.now(), customerId, classId, instructorId, datetime,
         customerName:   customer.name,
         className:      CLASSES.find(c => c.id === classId).name,
         instructorName: INSTRUCTORS.find(i => i.id === instructorId).name,
         balanceAtCheckin: customer.balance,
       };
-
-      // Deduct one class from balance
       if (customer.balance > 0) customer.balance--;
-
       checkins.unshift(checkin);
       localStorage.setItem('yogiCheckins', JSON.stringify(checkins));
-
       clearCheckinForm();
       renderTable();
       alert('Check-in saved successfully!');
     });
 
-    // ── Clear form ───────────────────────────────────────────────────────────
     function clearCheckinForm() {
       document.getElementById('customerSelect').value   = '';
       document.getElementById('classSelect').value      = '';
@@ -306,7 +216,6 @@
       banner.className = '';
     }
 
-    // ── Delete a check-in ────────────────────────────────────────────────────
     function deleteCheckin(id) {
       if (!confirm('Delete this check-in?')) return;
       checkins = checkins.filter(c => c.id !== id);
@@ -314,38 +223,28 @@
       renderTable();
     }
 
-    // ── Render table ─────────────────────────────────────────────────────────
     function renderTable() {
       const search     = document.getElementById('searchInput').value.toLowerCase();
       const instructor = document.getElementById('filterInstructor').value;
       const date       = document.getElementById('filterDate').value;
-
-      const filtered = checkins.filter(c => {
+      const filtered   = checkins.filter(c => {
         const matchSearch     = !search     || c.customerName.toLowerCase().includes(search) || c.className.toLowerCase().includes(search);
         const matchInstructor = !instructor || c.instructorId === instructor;
         const matchDate       = !date       || c.datetime.startsWith(date);
         return matchSearch && matchInstructor && matchDate;
       });
-
       const tbody = document.getElementById('checkinTableBody');
       const empty = document.getElementById('emptyState');
       tbody.innerHTML = '';
-
-      if (filtered.length === 0) {
-        empty.style.display = 'block';
-        return;
-      }
+      if (filtered.length === 0) { empty.style.display = 'block'; return; }
       empty.style.display = 'none';
-
       filtered.forEach(c => {
         let badgeClass = 'badge--valid';
         let badgeLabel = `${c.balanceAtCheckin} remaining`;
         if (c.balanceAtCheckin === 0)     { badgeClass = 'badge--expired'; badgeLabel = 'No classes'; }
         else if (c.balanceAtCheckin <= 2) { badgeClass = 'badge--low';     badgeLabel = `Low (${c.balanceAtCheckin})`; }
-
         const dt        = new Date(c.datetime);
         const formatted = dt.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${c.customerName}</td>
@@ -353,17 +252,12 @@
           <td>${c.instructorName}</td>
           <td>${formatted}</td>
           <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
-          <td>
-            <button class="btn btn--danger"
-              style="padding:.3rem .7rem; font-size:.8rem;"
-              onclick="deleteCheckin(${c.id})">Delete</button>
-          </td>
+          <td><button class="btn btn--danger" style="padding:.3rem .7rem; font-size:.8rem;" onclick="deleteCheckin(${c.id})">Delete</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // ── Init ─────────────────────────────────────────────────────────────────
     populateDropdowns();
     renderTable();
   </script>

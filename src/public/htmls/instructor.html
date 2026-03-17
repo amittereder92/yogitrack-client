@@ -2,78 +2,91 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Instructors</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
-<body class="layout--sidebar">
-  <aside class="sidebar">
-    <a class="logo-wrap" href="dashboard.html">
-      <img src="../images/Logo.png" alt="YogaTrack Logo" class="logo">
+<body>
+
+  <div class="page-shell">
+
+    <a class="wing-brand" href="dashboard.html">
+      <img src="../images/Logo.png" alt="YogiTrack Logo">
+      <span class="wing-brand-name">YogiTrack</span>
+      <span class="wing-brand-tagline">Studio Manager</span>
     </a>
-    <nav class="nav">
-      <a href="instructor.html" class="active">Instructors</a>
-      <a href="package.html">Packages</a>
-      <a href="schedule.html">Class Schedule</a>
-      <a href="customer.html">Customers</a>
-      <a href="checkin.html">Check-ins</a>
-      <a href="../index.html">Log Out</a>
-    </nav>
-  </aside>
 
-  <main class="layout--center">
-    <form class="card" id="instructorForm">
-      <h2>Instructor Details</h2>
+    <div class="center-col">
 
-      <label id="instructorIdLabel" for="instructorIdSelect">Instructor ID
-        <select name="instructorId" id="instructorIdSelect" class="form-input" required>
-          <option value=""> -- Select Instructor Id --</option>
-        </select>
-      </label>
-
-      <label id="instructorIdTextLabel" style="display:none;">Instructor ID
-        <input id="instructorIdText" type="text" name="instructorId" readonly>
-      </label>
-
-      <div class="grid-2">
-        <label>First&nbsp;Name
-          <input type="text" name="firstname">
-        </label>
-        <label>Last&nbsp;Name
-          <input type="text" name="lastname">
-        </label>
-      </div>
-
-      <label>Address
-        <textarea name="address" rows="2"></textarea>
-      </label>
-
-      <div class="grid-2">
-        <label>Phone
-          <input type="tel" name="phone">
-        </label>
-        <label>Email
-          <input type="email" name="email">
-        </label>
-      </div>
-
-      <fieldset>
-        <legend>Preferred Contact</legend>
-        <div class="radio-row">
-          <label><input type="radio" name="pref" value="phone"> Phone</label>
-          <label><input type="radio" name="pref" value="email"> Email</label>
+      <nav class="topnav">
+        <div class="nav-links">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="instructor.html" class="active">Instructors</a>
+          <a href="package.html">Packages</a>
+          <a href="schedule.html">Schedule</a>
+          <a href="customer.html">Customers</a>
+          <a href="checkin.html">Check-ins</a>
         </div>
-      </fieldset>
+        <a href="../index.html" class="nav-logout">Log out</a>
+      </nav>
 
-      <div class="btn-row">
-        <button type="button" class="btn" id="searchBtn">Search</button>
-        <button type="button" class="btn btn--primary" id="addBtn">Add&nbsp;New</button>
-        <button type="button" class="btn" id="saveBtn">Save</button>
-        <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
-        <button type="button" class="btn" onclick="clearInstructorForm()">Clear</button>
-        <a href="dashboard.html" class="btn">Exit</a>
+      <div class="content-panel">
+        <form class="card" id="instructorForm">
+          <h2>Instructor Details</h2>
+
+          <label id="instructorIdLabel" for="instructorIdSelect">Instructor ID
+            <select name="instructorId" id="instructorIdSelect" class="form-input" required>
+              <option value="">-- Select Instructor --</option>
+            </select>
+          </label>
+
+          <label id="instructorIdTextLabel" style="display:none;">Instructor ID
+            <input id="instructorIdText" type="text" name="instructorId" readonly>
+          </label>
+
+          <div class="grid-2">
+            <label>First Name
+              <input type="text" name="firstname">
+            </label>
+            <label>Last Name
+              <input type="text" name="lastname">
+            </label>
+          </div>
+
+          <label>Address
+            <textarea name="address" rows="2"></textarea>
+          </label>
+
+          <div class="grid-2">
+            <label>Phone
+              <input type="tel" name="phone">
+            </label>
+            <label>Email
+              <input type="email" name="email">
+            </label>
+          </div>
+
+          <fieldset>
+            <legend>Preferred Contact</legend>
+            <div class="radio-row">
+              <label><input type="radio" name="pref" value="phone"> Phone</label>
+              <label><input type="radio" name="pref" value="email"> Email</label>
+            </div>
+          </fieldset>
+
+          <div class="btn-row">
+            <button type="button" class="btn" id="searchBtn">Search</button>
+            <button type="button" class="btn btn--primary" id="addBtn">Add New</button>
+            <button type="button" class="btn" id="saveBtn">Save</button>
+            <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
+            <button type="button" class="btn" onclick="clearInstructorForm()">Clear</button>
+            <a href="dashboard.html" class="btn">Exit</a>
+          </div>
+        </form>
       </div>
-    </form>
-  </main>
+
+    </div>
+  </div>
 
   <script src="../js/instructor.js"></script>
 </body>
