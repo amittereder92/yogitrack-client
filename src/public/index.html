@@ -59,28 +59,6 @@
       letter-spacing: 0.06em;
       margin: 0 0 1.75rem;
     }
-    .role-toggle {
-      display: flex;
-      border: 1px solid #c2b9a7;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-    }
-    .role-toggle button {
-      flex: 1;
-      padding: 0.5rem;
-      border: none;
-      background: transparent;
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(9px, 0.85vw, 11px);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #9a8e84;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-    .role-toggle button.active { background: #3d3028; color: #f7f3ee; }
-    .role-toggle button:first-child { border-right: 1px solid #c2b9a7; }
     .login-field { text-align: left; margin-bottom: 1rem; }
     .login-field label {
       display: block;
@@ -146,11 +124,6 @@
     <h1>YogiTrack</h1>
     <p class="tagline">Studio management by yoga h'om</p>
 
-    <div class="role-toggle">
-      <button class="active" id="staffBtn" onclick="setRole('staff')">Staff Login</button>
-      <button id="customerBtn" onclick="setRole('customer')">Customer Login</button>
-    </div>
-
     <div class="login-field">
       <label for="username">Username</label>
       <input type="text" id="username" placeholder="Enter your username" autocomplete="username">
@@ -165,15 +138,6 @@
   </div>
 
   <script>
-    let selectedRole = 'staff';
-
-    function setRole(role) {
-      selectedRole = role;
-      document.getElementById('staffBtn').classList.toggle('active', role === 'staff');
-      document.getElementById('customerBtn').classList.toggle('active', role === 'customer');
-      document.getElementById('errorMsg').style.display = 'none';
-    }
-
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
@@ -190,7 +154,7 @@
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, role: selectedRole }),
+          body: JSON.stringify({ username, password }),
         });
 
         const data = await res.json();
