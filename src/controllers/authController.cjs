@@ -12,19 +12,12 @@ const login = async (req, res) => {
   }
 
   try {
-    // Try finding user by username first, then by email (for customers)
     let user = await User.findOne({ username: username.trim().toLowerCase() });
 
-    // If not found by username, try email match
-    if (!user) {
-      user = await User.findOne({ username: username.trim().toLowerCase().replace('@', '_at_') });
-    }
-
-    // If still not found, check if it's a customer email
     if (!user) {
       const customer = await Customer.findOne({ email: username.trim().toLowerCase() });
       if (customer) {
-        user = await User.findOne({ customerId: customer.customerId, role: 'customer' });
+        user = await User.findOne({ customerId: customer.customerId, role: "customer" });
       }
     }
 
@@ -61,6 +54,67 @@ const login = async (req, res) => {
   }
 };
 
+// POST /api/auth/register
+const register = async (req, res) => {
+  const { firstName, lastName, email, phone, password } = req.body;
+
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters." });
+  }
+
+  try {
+    const username = email.trim().toLowerCase();
+
+    // Check if user already exists
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(400).json({ error: "An account with this email already exists." });
+    }
+
+    // Get next customer ID
+    const customers  = await Customer.find({});
+    let maxNumber    = 0;
+    customers.forEach((c) => {
+      const match = c.customerId.match(/\d+$/);
+      if (match) {
+        const num = parseInt(match[0]);
+        if (num > maxNumber) maxNumber = num;
+      }
+    });
+    const customerId = `Y${String(maxNumber + 1).padStart(3, "0")}`;
+
+    // Create customer record
+    const newCustomer = new Customer({
+      customerId,
+      firstName: firstName.trim(),
+      lastName:  lastName.trim(),
+      email:     username,
+      phone:     phone || "",
+      classBalance: 0,
+    });
+    await newCustomer.save();
+
+    // Create user account
+    const newUser = new User({
+      username,
+      password,
+      role:        "customer",
+      customerId,
+      displayName: `${firstName} ${lastName}`,
+    });
+    await newUser.save();
+
+    return res.json({ success: true, customerId });
+
+  } catch (err) {
+    console.error("Register error:", err.message);
+    return res.status(500).json({ error: "Registration failed. Please try again." });
+  }
+};
+
 // POST /api/auth/logout
 const logout = (req, res) => {
   req.session.destroy(() => {
@@ -88,4 +142,4 @@ const requireLogin = (req, res, next) => {
   return res.status(401).json({ error: "Please log in." });
 };
 
-module.exports = { login, logout, me, requireStaff, requireLogin };
+module.exports = { login, register, logout, me, requireStaff, requireLogin };
