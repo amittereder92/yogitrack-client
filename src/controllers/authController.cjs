@@ -1,6 +1,7 @@
-const bcrypt   = require("bcryptjs");
-const User     = require("../models/userModel.cjs");
-const Customer = require("../models/customerModel.cjs");
+const bcrypt     = require("bcryptjs");
+const User       = require("../models/userModel.cjs");
+const Customer   = require("../models/customerModel.cjs");
+const Instructor = require("../models/instructorModel.cjs");
 
 // POST /api/auth/login
 const login = async (req, res) => {
@@ -21,6 +22,13 @@ const login = async (req, res) => {
       }
     }
 
+    if (!user) {
+      const instructor = await Instructor.findOne({ email: username.trim().toLowerCase() });
+      if (instructor) {
+        user = await User.findOne({ instructorId: instructor.instructorId, role: "instructor" });
+      }
+    }
+
     console.log("User found:", user ? user.username : "NOT FOUND");
 
     if (!user) {
@@ -35,17 +43,24 @@ const login = async (req, res) => {
     }
 
     req.session.user = {
-      id:          user._id,
-      username:    user.username,
-      role:        user.role,
-      customerId:  user.customerId,
-      displayName: user.displayName,
+      id:           user._id,
+      username:     user.username,
+      role:         user.role,
+      customerId:   user.customerId,
+      instructorId: user.instructorId,
+      displayName:  user.displayName,
+    };
+
+    const redirectMap = {
+      staff:      "/htmls/dashboard.html",
+      customer:   "/htmls/customer-portal.html",
+      instructor: "/htmls/instructor-portal.html",
     };
 
     return res.json({
       success:  true,
       role:     user.role,
-      redirect: user.role === "staff" ? "/htmls/dashboard.html" : "/htmls/customer-portal.html",
+      redirect: redirectMap[user.role] || "/index.html",
     });
 
   } catch (err) {
@@ -67,14 +82,11 @@ const register = async (req, res) => {
 
   try {
     const username = email.trim().toLowerCase();
-
-    // Check if user already exists
     const existing = await User.findOne({ username });
     if (existing) {
       return res.status(400).json({ error: "An account with this email already exists." });
     }
 
-    // Get next customer ID
     const customers  = await Customer.find({});
     let maxNumber    = 0;
     customers.forEach((c) => {
@@ -86,7 +98,6 @@ const register = async (req, res) => {
     });
     const customerId = `Y${String(maxNumber + 1).padStart(3, "0")}`;
 
-    // Create customer record
     const newCustomer = new Customer({
       customerId,
       firstName: firstName.trim(),
@@ -97,7 +108,6 @@ const register = async (req, res) => {
     });
     await newCustomer.save();
 
-    // Create user account
     const newUser = new User({
       username,
       password,
@@ -130,13 +140,11 @@ const me = (req, res) => {
   return res.json({ loggedIn: false });
 };
 
-// Middleware — staff only
 const requireStaff = (req, res, next) => {
   if (req.session.user && req.session.user.role === "staff") return next();
   return res.status(403).json({ error: "Staff access required." });
 };
 
-// Middleware — any logged in user
 const requireLogin = (req, res, next) => {
   if (req.session.user) return next();
   return res.status(401).json({ error: "Please log in." });
