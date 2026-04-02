@@ -12,7 +12,7 @@ exports.getClass = async (req, res) => {
 
 exports.getClassIds = async (req, res) => {
   try {
-    const classes = await Class.find({}, { classId: 1, className: 1, _id: 0 }).sort({ classId: 1 });
+    const classes = await Class.find({}, { classId: 1, className: 1, classType: 1, instructorId: 1, _id: 0 }).sort({ classId: 1 });
     res.json(classes);
   } catch (e) {
     res.status(400).json({ error: e.message });
