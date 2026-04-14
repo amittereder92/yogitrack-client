@@ -35,17 +35,25 @@
 
       <h2>Reports</h2>
 
-      <!-- Date Range Filter -->
-      <div class="form-box">
-        <h3>Date Range</h3>
-        <label>Start Date</label>
-        <input type="date" id="startDate">
+<!-- Date Range Filter -->
+<div class="form-box">
+  <h3>Date Range</h3>
+  <label>Start Date</label>
+  <input type="date" id="startDate">
 
-        <label>End Date</label>
-        <input type="date" id="endDate">
+  <label>End Date</label>
+  <input type="date" id="endDate">
 
-        <button onclick="loadAllReports()">Run Reports</button>
-      </div>
+  <button onclick="loadAllReports()">Run Reports</button>
+</div>
+
+<script>
+  // Set endDate to today's date on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("endDate").value = today;
+  });
+</script>
 
       <!-- Package Sales -->
       <div class="table-box">
