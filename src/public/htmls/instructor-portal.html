@@ -223,7 +223,6 @@
 
     let allCustomers   = [];
     let allClasses     = [];
-    let allInstructors = [];
     let myInstructorId = null;
 
     async function init() {
@@ -239,14 +238,12 @@
         `Welcome, ${data.user.displayName} ☀︎`;
 
       // Load all data
-      const [custRes, classRes, instrRes] = await Promise.all([
+      const [custRes, classRes] = await Promise.all([
         fetch('/api/customer/getCustomerIds'),
         fetch('/api/schedule/getClassIds'),
-        fetch('/api/instructor/getInstructorIds'),
       ]);
       allCustomers   = await custRes.json();
       const classIds = await classRes.json();
-      allInstructors = await instrRes.json();
 
       // Load full class details
       const details  = await Promise.all(
@@ -394,18 +391,24 @@
     }
 
     async function loadInstructorTable() {
-      const res   = await fetch('/api/instructor/getInstructorIds');
-      const instrs = await res.json();
-      const all   = await Promise.all(
-        instrs.map(i => fetch(`/api/instructor/getInstructor?instructorId=${i.instructorId}`).then(r => r.json()))
+      // Load customers with instructor role
+      const res        = await fetch('/api/customer/getInstructors');
+      const instructors = await res.json();
+      const details    = await Promise.all(
+        instructors.map(i => fetch(`/api/customer/getCustomer?customerId=${i.customerId}`).then(r => r.json()))
       );
       const tbody = document.getElementById('instructorTableBody');
       tbody.innerHTML = '';
-      all.forEach(i => {
+      if (!details.length) {
+        document.getElementById('instructorEmpty').style.display = 'block';
+        return;
+      }
+      document.getElementById('instructorEmpty').style.display = 'none';
+      details.forEach(i => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${i.instructorId}</td>
-          <td>${i.firstname} ${i.lastname}</td>
+          <td>${i.customerId}</td>
+          <td>${i.firstName} ${i.lastName}</td>
           <td>${i.phone || '—'}</td>
           <td>${i.email || '—'}</td>
           <td>${i.preferredContact || '—'}</td>
@@ -415,6 +418,13 @@
     }
 
     async function loadScheduleView() {
+      // Load instructor names from customer records with instructor role
+      const instrRes    = await fetch('/api/customer/getInstructors');
+      const instrIds    = await instrRes.json();
+      const instrDetails = await Promise.all(
+        instrIds.map(i => fetch(`/api/customer/getCustomer?customerId=${i.customerId}`).then(r => r.json()))
+      );
+
       const idsRes  = await fetch('/api/schedule/getClassIds');
       const ids     = await idsRes.json();
       const details = await Promise.all(
@@ -448,9 +458,10 @@
           block.appendChild(none);
         } else {
           byDay[day].forEach(cls => {
-            const slot     = cls._slot;
-            const instr    = allInstructors.find(i => i.instructorId === cls.instructorId);
-            const instrName = instr ? `${instr.firstname} ${instr.lastname}` : '';
+            const slot = cls._slot;
+            // Match instructor by customerId (instructorId field on class)
+            const instr = instrDetails.find(i => i.customerId === cls.instructorId);
+            const instrName = instr ? `${instr.firstName} ${instr.lastName}` : '';
             const [h, m]   = slot.time.split(':');
             const startMin = parseInt(h)*60 + parseInt(m);
             const endMin   = slot.duration ? startMin + parseInt(slot.duration) : null;
