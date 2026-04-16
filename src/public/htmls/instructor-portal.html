@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Instructor Portal</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.css">
   <style>
     .welcome-name {
       font-family: 'Fraunces', serif;
@@ -13,8 +14,6 @@
       font-weight: 300;
       margin-bottom: 20px;
     }
-
-    /* ── View-only table styles ── */
     .view-table-wrap {
       width: 100%;
       max-width: 700px;
@@ -29,13 +28,7 @@
       border-bottom: 1px solid var(--taupe-light);
       background: var(--cream-dark);
     }
-    .view-table-header h2 {
-      margin: 0;
-      font-size: clamp(14px, 1.2vw, 18px);
-      color: var(--bark);
-    }
-
-    /* ── Schedule day-by-day ── */
+    .view-table-header h2 { margin: 0; font-size: clamp(14px, 1.2vw, 18px); color: var(--bark); }
     .schedule-page { width: 100%; max-width: 700px; }
     .day-block { margin-bottom: 24px; }
     .day-heading {
@@ -57,59 +50,25 @@
       border-bottom: 1px solid rgba(237,232,224,0.8);
     }
     .class-row:last-child { border-bottom: none; }
-    .class-time {
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(11px, 0.9vw, 13px);
-      color: #3d3028;
-      min-width: clamp(90px, 10vw, 130px);
-      flex-shrink: 0;
-    }
+    .class-time { font-family: 'Lato', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #3d3028; min-width: clamp(90px, 10vw, 130px); flex-shrink: 0; }
     .class-divider { font-size: 11px; color: #c2b9a7; flex-shrink: 0; }
-    .class-name-col {
-      flex: 1;
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(12px, 1vw, 14px);
-      color: #3d3028;
-      font-weight: 500;
-    }
-    .class-instructor-col {
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(11px, 0.9vw, 13px);
-      color: #7a8c6e;
-      font-style: italic;
-      flex-shrink: 0;
-    }
-    .class-type-tag {
-      display: inline-block;
-      font-size: 9px;
-      padding: 1px 7px;
-      border-radius: 8px;
-      background: #ede8e0;
-      color: #7a6e65;
-      font-family: 'Lato', sans-serif;
-      letter-spacing: 0.06em;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-    .no-classes {
-      font-family: 'Lato', sans-serif;
-      font-size: 12px;
-      color: #c2b9a7;
-      font-style: italic;
-      padding: 6px 0;
-    }
-    .view-only-notice {
-      font-family: 'Lato', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #b5724a;
-      background: #f5ece4;
-      padding: 4px 10px;
-      border-radius: 4px;
-      display: inline-block;
-      margin-bottom: 16px;
-    }
+    .class-name-col { flex: 1; font-family: 'Lato', sans-serif; font-size: clamp(12px, 1vw, 14px); color: #3d3028; font-weight: 500; }
+    .class-instructor-col { font-family: 'Lato', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #7a8c6e; font-style: italic; flex-shrink: 0; }
+    .class-type-tag { display: inline-block; font-size: 9px; padding: 1px 7px; border-radius: 8px; background: #ede8e0; color: #7a6e65; font-family: 'Lato', sans-serif; letter-spacing: 0.06em; margin-left: 6px; vertical-align: middle; }
+    .no-classes { font-family: 'Lato', sans-serif; font-size: 12px; color: #c2b9a7; font-style: italic; padding: 6px 0; }
+    .view-only-notice { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #b5724a; background: #f5ece4; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 16px; }
+
+    /* Choices.js overrides */
+    .choices__inner { background: #faf8f5; border: 1px solid #c2b9a7; border-radius: 4px; padding: 0.4rem 0.6rem; font-family: 'Lato', sans-serif; font-size: clamp(13px, 1vw, 15px); font-weight: 300; color: #3d3028; min-height: unset; }
+    .choices__inner:focus-within { border-color: #7a8c6e; box-shadow: 0 0 0 3px rgba(122,140,110,0.12); }
+    .choices__list--dropdown { border: 1px solid #c2b9a7; border-radius: 4px; background: #faf8f5; font-family: 'Lato', sans-serif; z-index: 100; }
+    .choices__list--dropdown .choices__item--selectable { font-size: 13px; color: #3d3028; padding: 8px 12px; }
+    .choices__list--dropdown .choices__item--selectable.is-highlighted { background: #ede8e0; color: #3d3028; }
+    .choices__input { font-family: 'Lato', sans-serif; font-size: 13px; background: #faf8f5; color: #3d3028; }
+    .choices[data-type*=select-one] .choices__inner { padding-right: 2rem; }
+    .choices__placeholder { color: #9a8e84; }
+    .choices__list--single { padding: 0; }
+    .choices__list--single .choices__item { font-size: 13px; color: #3d3028; }
   </style>
 </head>
 <body>
@@ -123,10 +82,11 @@
     <div class="center-col">
       <nav class="topnav">
         <div class="nav-links">
-          <a href="#" id="navDashboard" onclick="showSection('dashboard')" class="active">Dashboard</a>
+          <a href="#" id="navDashboard"   onclick="showSection('dashboard')"  class="active">Dashboard</a>
           <a href="#" id="navInstructors" onclick="showSection('instructors')">Instructors</a>
-          <a href="#" id="navSchedule" onclick="showSection('schedule')">Schedule</a>
-          <a href="#" id="navCheckin" onclick="showSection('checkin')">Check-ins</a>
+          <a href="#" id="navSchedule"    onclick="showSection('schedule')">Schedule</a>
+          <a href="#" id="navCustomers"   onclick="showSection('customers')">Customers</a>
+          <a href="#" id="navCheckin"     onclick="showSection('checkin')">Check-ins</a>
         </div>
         <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
@@ -147,13 +107,7 @@
           <div class="view-table-header"><h2>Instructors</h2></div>
           <table>
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Pref. Contact</th>
-              </tr>
+              <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Pref. Contact</th></tr>
             </thead>
             <tbody id="instructorTableBody"></tbody>
           </table>
@@ -166,6 +120,64 @@
         <div class="view-only-notice">View Only</div>
         <div class="schedule-page">
           <div id="scheduleByDay"><p style="font-family:'Lato',sans-serif; color:#9a8e84; font-size:13px;">Loading...</p></div>
+        </div>
+      </div>
+
+      <!-- Customers -->
+      <div class="content-panel" id="customersSection" style="display:none;">
+        <div class="card card--wide">
+          <h2>Customer Lookup</h2>
+
+          <label>Select Customer
+            <select id="custLookupSelect" class="form-input">
+              <option value="">-- Select Customer --</option>
+            </select>
+          </label>
+
+          <!-- Read-only customer info -->
+          <div id="custInfoPanel" style="display:none; margin-top:1rem;">
+            <div class="grid-2">
+              <label>First Name <input type="text" id="custFirstName" readonly style="background:#f0ebe4;"></label>
+              <label>Last Name  <input type="text" id="custLastName"  readonly style="background:#f0ebe4;"></label>
+            </div>
+            <div class="grid-2">
+              <label>Class Balance <input type="text" id="custBalance" readonly style="background:#f0ebe4;"></label>
+              <label>Senior (62+)  <input type="text" id="custSenior"  readonly style="background:#f0ebe4;"></label>
+            </div>
+            <label>Emergency Contact Name <input type="text" id="custEmergencyName" readonly style="background:#f0ebe4;"></label>
+            <label>Emergency Contact Phone <input type="text" id="custEmergencyPhone" readonly style="background:#f0ebe4;"></label>
+          </div>
+        </div>
+
+        <!-- Package Sale -->
+        <div class="card card--wide" id="instrPackageSaleSection" style="display:none; margin-top:1rem;">
+          <h2>Sell Package</h2>
+          <p id="instrSaleCustomerName" style="font-family:'Lato',sans-serif; font-size:13px; color:#7a8c6e; margin:-0.5rem 0 1rem;"></p>
+
+          <label>Package
+            <select id="instrSalePackageSelect" class="form-input styled-select" onchange="instrOnPackageSelected()">
+              <option value="">-- Select Package --</option>
+            </select>
+          </label>
+
+          <div id="instrSaleFeedback" style="display:none; margin:0.75rem 0; padding:0.6rem 0.85rem; border-radius:4px; font-family:'Lato',sans-serif; font-size:13px;"></div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn--primary" onclick="instrSellPackage()">Apply Package</button>
+            <button type="button" class="btn" onclick="instrClearSale()">Clear</button>
+          </div>
+
+          <!-- Sale history -->
+          <div style="margin-top:1.5rem;">
+            <h3 style="font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0 0 0.75rem;">Purchase History</h3>
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Package</th><th>Classes</th><th>Amount</th><th>Method</th></tr>
+              </thead>
+              <tbody id="instrSaleHistoryBody"></tbody>
+            </table>
+            <div id="instrSaleHistoryEmpty" style="font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:8px 0; display:none;">No purchases yet.</div>
+          </div>
         </div>
       </div>
 
@@ -196,17 +208,10 @@
         </form>
 
         <div class="table-wrap">
-          <div class="table-header">
-            <h2>Today's Check-ins</h2>
-          </div>
+          <div class="table-header"><h2>Today's Check-ins</h2></div>
           <table>
             <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Class</th>
-                <th>Time</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Customer</th><th>Class</th><th>Time</th><th>Actions</th></tr>
             </thead>
             <tbody id="checkinTableBody"></tbody>
           </table>
@@ -217,13 +222,16 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.js"></script>
   <script>
     const DAYS_ORDER = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const DAY_FULL   = { Sun:"Sunday", Mon:"Monday", Tue:"Tuesday", Wed:"Wednesday", Thu:"Thursday", Fri:"Friday", Sat:"Saturday" };
 
-    let allCustomers   = [];
-    let allClasses     = [];
-    let myInstructorId = null;
+    let allCustomers    = [];
+    let allClasses      = [];
+    let allPackages     = [];
+    let myInstructorId  = null;
+    let custChoices     = null;
 
     async function init() {
       const res  = await fetch('/api/auth/me');
@@ -234,28 +242,154 @@
       }
 
       myInstructorId = data.user.instructorId;
-      document.getElementById('welcomeName').textContent =
-        `Welcome, ${data.user.displayName} ☀︎`;
+      document.getElementById('welcomeName').textContent = `Welcome, ${data.user.displayName} ☀︎`;
 
-      // Load all data
-      const [custRes, classRes] = await Promise.all([
+      const [custRes, classRes, pkgRes] = await Promise.all([
         fetch('/api/customer/getCustomerIds'),
         fetch('/api/schedule/getClassIds'),
+        fetch('/api/package/getPackageIds'),
       ]);
-      allCustomers   = await custRes.json();
+      allCustomers = await custRes.json();
       const classIds = await classRes.json();
+      allPackages  = await pkgRes.json();
 
-      // Load full class details
-      const details  = await Promise.all(
+      const details = await Promise.all(
         classIds.map(c => fetch(`/api/schedule/getClass?classId=${c.classId}`).then(r => r.json()))
       );
       allClasses = details;
 
-      // Populate check-in dropdowns
       populateCheckinDropdowns();
       loadTodayCheckins();
+      initCustLookup();
+      populateInstrPackages();
     }
 
+    // ── Customer Lookup ──────────────────────────────────────────
+    function initCustLookup() {
+      const select = document.getElementById('custLookupSelect');
+      allCustomers.forEach(c => {
+        const o = document.createElement('option');
+        o.value = c.customerId;
+        o.textContent = `${c.firstName} ${c.lastName} (${c.customerId})`;
+        select.appendChild(o);
+      });
+
+      custChoices = new Choices(select, {
+        searchEnabled: true,
+        searchPlaceholderValue: 'Type to search…',
+        itemSelectText: '',
+        shouldSort: false,
+        placeholder: true,
+        placeholderValue: '-- Select Customer --',
+      });
+
+      select.addEventListener('change', async () => {
+        const customerId = select.value;
+        if (!customerId) {
+          document.getElementById('custInfoPanel').style.display = 'none';
+          document.getElementById('instrPackageSaleSection').style.display = 'none';
+          return;
+        }
+        const res  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
+        const data = await res.json();
+
+        document.getElementById('custFirstName').value      = data.firstName || '';
+        document.getElementById('custLastName').value       = data.lastName  || '';
+        document.getElementById('custBalance').value        = `${data.classBalance || 0} classes`;
+        document.getElementById('custSenior').value         = data.senior ? 'Yes' : 'No';
+        document.getElementById('custEmergencyName').value  = data.emergencyContact?.name  || '';
+        document.getElementById('custEmergencyPhone').value = data.emergencyContact?.phone || '';
+
+        document.getElementById('custInfoPanel').style.display          = 'block';
+        document.getElementById('instrPackageSaleSection').style.display = 'block';
+        document.getElementById('instrSaleCustomerName').textContent     =
+          `Selling to: ${data.firstName} ${data.lastName} — Balance: ${data.classBalance || 0} classes`;
+
+        instrClearSale();
+        instrLoadSaleHistory(customerId);
+      });
+    }
+
+    function populateInstrPackages() {
+      const sel = document.getElementById('instrSalePackageSelect');
+      allPackages.forEach(p => {
+        const o = document.createElement('option');
+        o.value = p.packageId;
+        o.textContent = `${p.packageName}${p.price ? ` — $${p.price}` : ''}${p.classCount ? ` (${p.classCount} classes)` : ''}`;
+        o.dataset.classes = p.classCount || 0;
+        o.dataset.price   = p.price || 0;
+        sel.appendChild(o);
+      });
+    }
+
+    function instrOnPackageSelected() { /* auto-fill not needed for instructor view */ }
+
+    async function instrSellPackage() {
+      const customerId = document.getElementById('custLookupSelect').value;
+      const packageId  = document.getElementById('instrSalePackageSelect').value;
+
+      if (!customerId) { instrShowFeedback('Please select a customer first.', false); return; }
+      if (!packageId)  { instrShowFeedback('Please select a package.', false); return; }
+
+      const sel = document.getElementById('instrSalePackageSelect');
+      const opt = sel.options[sel.selectedIndex];
+
+      try {
+        const res  = await fetch('/api/sales/sell', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            customerId,
+            packageId,
+            classesAdded:  opt.dataset.classes,
+            amountPaid:    opt.dataset.price,
+            paymentMethod: 'cash',
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) { instrShowFeedback(data.error || 'Sale failed.', false); return; }
+
+        instrShowFeedback(`✅ Package applied! New balance: ${data.newBalance} classes.`, true);
+        document.getElementById('custBalance').value = `${data.newBalance} classes`;
+        document.getElementById('instrSaleCustomerName').textContent =
+          `Selling to: ${document.getElementById('custFirstName').value} ${document.getElementById('custLastName').value} — Balance: ${data.newBalance} classes`;
+        instrLoadSaleHistory(customerId);
+      } catch (err) {
+        instrShowFeedback('Could not connect. Please try again.', false);
+      }
+    }
+
+    function instrShowFeedback(msg, success) {
+      const el = document.getElementById('instrSaleFeedback');
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.style.background = success ? '#e4ede0' : '#f8e8e8';
+      el.style.color      = success ? '#3d6b2e' : '#842029';
+      el.style.border     = success ? '1px solid #b2d4a8' : '1px solid #f1aeb5';
+    }
+
+    async function instrLoadSaleHistory(customerId) {
+      const res   = await fetch(`/api/sales/history?customerId=${customerId}`);
+      const sales = await res.json();
+      const tbody = document.getElementById('instrSaleHistoryBody');
+      const empty = document.getElementById('instrSaleHistoryEmpty');
+      tbody.innerHTML = '';
+      if (!sales.length) { empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      sales.forEach(s => {
+        const dt = new Date(s.saleDate).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${dt}</td><td>${s.packageName}</td><td>${s.classesAdded}</td><td>$${parseFloat(s.amountPaid).toFixed(2)}</td><td>${s.paymentMethod}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function instrClearSale() {
+      document.getElementById('instrSalePackageSelect').value = '';
+      document.getElementById('instrSaleFeedback').style.display = 'none';
+    }
+
+    // ── Check-ins ────────────────────────────────────────────────
     function populateCheckinDropdowns() {
       const custSel = document.getElementById('customerSelect');
       allCustomers.forEach(c => {
@@ -277,13 +411,11 @@
       document.getElementById('checkinDatetime').value = now.toISOString().slice(0,16);
     }
 
-    // Validate balance on customer select
     document.addEventListener('change', async (e) => {
       if (e.target.id !== 'customerSelect') return;
       const customerId = e.target.value;
       const banner     = document.getElementById('validationBanner');
       if (!customerId) { banner.style.display = 'none'; return; }
-
       const res      = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
       const customer = await res.json();
       banner.style.display = 'block';
@@ -303,31 +435,18 @@
       const customerId = document.getElementById('customerSelect').value;
       const classId    = document.getElementById('classSelect').value;
       const datetime   = document.getElementById('checkinDatetime').value;
-
-      if (!customerId || !classId || !datetime) {
-        alert('Please fill in all fields.');
-        return;
-      }
+      if (!customerId || !classId || !datetime) { alert('Please fill in all fields.'); return; }
 
       try {
         const idRes      = await fetch('/api/checkin/getNextId');
         const { nextId } = await idRes.json();
-
         const res = await fetch('/api/checkin/add', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
-            checkinId:       nextId,
-            customerId,
-            classId,
-            instructorId:    myInstructorId || '',
-            checkinDatetime: datetime,
-          }),
+          body:    JSON.stringify({ checkinId: nextId, customerId, classId, instructorId: myInstructorId || '', checkinDatetime: datetime }),
         });
         const result = await res.json();
         if (!res.ok) throw new Error(result.message || 'Failed to save');
-
-        // Deduct balance
         const custRes  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
         const customer = await custRes.json();
         if (customer.classBalance > 0) {
@@ -337,8 +456,7 @@
             body:    JSON.stringify({ ...customer, classBalance: customer.classBalance - 1 }),
           });
         }
-
-        alert(`✅ Check-in saved!`);
+        alert('✅ Check-in saved!');
         clearCheckinForm();
         loadTodayCheckins();
       } catch (err) {
@@ -351,14 +469,11 @@
       const checkins = await res.json();
       const today    = new Date().toISOString().slice(0, 10);
       const todays   = checkins.filter(c => c.checkinDatetime && c.checkinDatetime.startsWith(today));
-
       const tbody = document.getElementById('checkinTableBody');
       const empty = document.getElementById('checkinEmpty');
       tbody.innerHTML = '';
-
       if (!todays.length) { empty.style.display = 'block'; return; }
       empty.style.display = 'none';
-
       todays.forEach(c => {
         const cust = allCustomers.find(cu => cu.customerId === c.customerId);
         const cls  = allClasses.find(cl => cl.classId === c.classId);
@@ -390,47 +505,36 @@
       banner.className = '';
     }
 
+    // ── Instructors table ────────────────────────────────────────
     async function loadInstructorTable() {
-      // Load customers with instructor role
-      const res        = await fetch('/api/customer/getInstructors');
+      const res         = await fetch('/api/customer/getInstructors');
       const instructors = await res.json();
-      const details    = await Promise.all(
+      const details     = await Promise.all(
         instructors.map(i => fetch(`/api/customer/getCustomer?customerId=${i.customerId}`).then(r => r.json()))
       );
       const tbody = document.getElementById('instructorTableBody');
       tbody.innerHTML = '';
-      if (!details.length) {
-        document.getElementById('instructorEmpty').style.display = 'block';
-        return;
-      }
+      if (!details.length) { document.getElementById('instructorEmpty').style.display = 'block'; return; }
       document.getElementById('instructorEmpty').style.display = 'none';
       details.forEach(i => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${i.customerId}</td>
-          <td>${i.firstName} ${i.lastName}</td>
-          <td>${i.phone || '—'}</td>
-          <td>${i.email || '—'}</td>
-          <td>${i.preferredContact || '—'}</td>
-        `;
+        tr.innerHTML = `<td>${i.customerId}</td><td>${i.firstName} ${i.lastName}</td><td>${i.phone || '—'}</td><td>${i.email || '—'}</td><td>${i.preferredContact || '—'}</td>`;
         tbody.appendChild(tr);
       });
     }
 
+    // ── Schedule view ────────────────────────────────────────────
     async function loadScheduleView() {
-      // Load instructor names from customer records with instructor role
-      const instrRes    = await fetch('/api/customer/getInstructors');
-      const instrIds    = await instrRes.json();
+      const instrRes     = await fetch('/api/customer/getInstructors');
+      const instrIds     = await instrRes.json();
       const instrDetails = await Promise.all(
         instrIds.map(i => fetch(`/api/customer/getCustomer?customerId=${i.customerId}`).then(r => r.json()))
       );
-
       const idsRes  = await fetch('/api/schedule/getClassIds');
       const ids     = await idsRes.json();
       const details = await Promise.all(
         ids.map(c => fetch(`/api/schedule/getClass?classId=${c.classId}`).then(r => r.json()))
       );
-
       const byDay = {};
       DAYS_ORDER.forEach(d => byDay[d] = []);
       details.forEach(cls => {
@@ -439,10 +543,8 @@
         });
       });
       DAYS_ORDER.forEach(d => byDay[d].sort((a,b) => a._slot.time.localeCompare(b._slot.time)));
-
       const container = document.getElementById('scheduleByDay');
       container.innerHTML = '';
-
       DAYS_ORDER.forEach(day => {
         const block = document.createElement('div');
         block.className = 'day-block';
@@ -450,7 +552,6 @@
         heading.className = 'day-heading';
         heading.textContent = DAY_FULL[day];
         block.appendChild(heading);
-
         if (!byDay[day].length) {
           const none = document.createElement('div');
           none.className = 'no-classes';
@@ -458,17 +559,13 @@
           block.appendChild(none);
         } else {
           byDay[day].forEach(cls => {
-            const slot = cls._slot;
-            // Match instructor by customerId (instructorId field on class)
-            const instr = instrDetails.find(i => i.customerId === cls.instructorId);
+            const slot      = cls._slot;
+            const instr     = instrDetails.find(i => i.customerId === cls.instructorId);
             const instrName = instr ? `${instr.firstName} ${instr.lastName}` : '';
-            const [h, m]   = slot.time.split(':');
-            const startMin = parseInt(h)*60 + parseInt(m);
-            const endMin   = slot.duration ? startMin + parseInt(slot.duration) : null;
-            function fmt(t) {
-              const hh = Math.floor(t/60)%24, mm = t%60;
-              return `${hh%12||12}:${String(mm).padStart(2,'0')} ${hh>=12?'PM':'AM'}`;
-            }
+            const [h, m]    = slot.time.split(':');
+            const startMin  = parseInt(h)*60 + parseInt(m);
+            const endMin    = slot.duration ? startMin + parseInt(slot.duration) : null;
+            function fmt(t) { const hh = Math.floor(t/60)%24, mm = t%60; return `${hh%12||12}:${String(mm).padStart(2,'0')} ${hh>=12?'PM':'AM'}`; }
             const timeStr = endMin ? `${fmt(startMin)} – ${fmt(endMin)}` : fmt(startMin);
             const row = document.createElement('div');
             row.className = 'class-row';
@@ -485,14 +582,14 @@
       });
     }
 
+    // ── Section switching ────────────────────────────────────────
     function showSection(section) {
-      ['dashboard','instructors','schedule','checkin'].forEach(s => {
+      ['dashboard','instructors','schedule','customers','checkin'].forEach(s => {
         document.getElementById(s + 'Section').style.display = s === section ? 'flex' : 'none';
       });
       document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-      const map = { dashboard:'navDashboard', instructors:'navInstructors', schedule:'navSchedule', checkin:'navCheckin' };
+      const map = { dashboard:'navDashboard', instructors:'navInstructors', schedule:'navSchedule', customers:'navCustomers', checkin:'navCheckin' };
       document.getElementById(map[section])?.classList.add('active');
-
       if (section === 'instructors') loadInstructorTable();
       if (section === 'schedule')    loadScheduleView();
       if (section === 'checkin')     loadTodayCheckins();
