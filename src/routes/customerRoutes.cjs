@@ -6,6 +6,7 @@ router.get("/getCustomer",    controller.getCustomer);
 router.get("/getCustomerIds", controller.getCustomerIds);
 router.get("/getNextId",      controller.getNextId);
 router.get("/getRole",        controller.getRole);
+router.get("/getInstructors", controller.getInstructors);
 router.post("/add",           controller.add);
 router.put("/update",         controller.update);
 router.delete("/deleteCustomer", controller.deleteCustomer);

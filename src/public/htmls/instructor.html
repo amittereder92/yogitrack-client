@@ -26,35 +26,34 @@
           <a href="schedule.html">Schedule</a>
           <a href="customer.html">Customers</a>
           <a href="checkin.html">Check-ins</a>
-          <a href="reports.html">Reports</a>
         </div>
         <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
 
       <div class="content-panel">
-        <form class="card" id="instructorForm">
+        <form class="card card--wide" id="instructorForm">
           <h2>Instructor Details</h2>
+          <p style="font-family:'Lato',sans-serif; font-size:11px; color:#9a8e84; margin:-0.5rem 0 1rem; letter-spacing:0.04em;">
+            Instructors are customers with the Instructor role. To add an instructor, go to the
+            <a href="customer.html" style="color:#b5724a;">Customers</a> page and set their Portal Role to Instructor.
+          </p>
 
-          <label id="instructorIdLabel" for="instructorIdSelect">Instructor ID
-            <select name="instructorId" id="instructorIdSelect" class="form-input" required>
+          <label id="instructorIdLabel" for="instructorIdSelect">Select Instructor
+            <select id="instructorIdSelect" class="form-input">
               <option value="">-- Select Instructor --</option>
             </select>
           </label>
 
-          <label id="instructorIdTextLabel" style="display:none;">Instructor ID
-            <input id="instructorIdText" type="text" name="instructorId" readonly>
-          </label>
-
           <div class="grid-2">
-            <label>First Name <input type="text" name="firstname"></label>
-            <label>Last Name  <input type="text" name="lastname"></label>
+            <label>First Name <input type="text" id="firstName" readonly style="background:#f0ebe4;"></label>
+            <label>Last Name  <input type="text" id="lastName"  readonly style="background:#f0ebe4;"></label>
           </div>
 
-          <label>Address <textarea name="address" rows="2"></textarea></label>
+          <label>Address <textarea id="address" rows="2"></textarea></label>
 
           <div class="grid-2">
-            <label>Phone <input type="tel" name="phone"></label>
-            <label>Email <input type="email" name="email"></label>
+            <label>Phone <input type="tel"   id="phone"></label>
+            <label>Email <input type="email" id="email" readonly style="background:#f0ebe4;"></label>
           </div>
 
           <fieldset>
@@ -66,11 +65,9 @@
           </fieldset>
 
           <div class="btn-row">
-            <button type="button" class="btn" id="searchBtn">Search</button>
-            <button type="button" class="btn btn--primary" id="addBtn">Add New</button>
-            <button type="button" class="btn" id="saveBtn">Save</button>
-            <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
-            <button type="button" class="btn" onclick="clearInstructorForm()">Clear</button>
+            <button type="button" class="btn btn--primary" id="saveBtn">Save</button>
+            <button type="button" class="btn btn--danger" id="removeRoleBtn">Remove Instructor Role</button>
+            <button type="button" class="btn" onclick="clearForm()">Clear</button>
             <a href="dashboard.html" class="btn">Exit</a>
           </div>
         </form>

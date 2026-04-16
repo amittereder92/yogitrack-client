@@ -38,6 +38,21 @@ exports.getNextId = async (req, res) => {
   }
 };
 
+// GET /api/customer/getInstructors — customers with instructor role
+exports.getInstructors = async (req, res) => {
+  try {
+    const users = await User.find({ role: "instructor" }, { customerId: 1, displayName: 1, _id: 0 });
+    const customerIds = users.map(u => u.customerId).filter(Boolean);
+    const customers = await Customer.find(
+      { customerId: { $in: customerIds } },
+      { customerId: 1, firstName: 1, lastName: 1, _id: 0 }
+    ).sort({ customerId: 1 });
+    res.json(customers);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
 // GET /api/customer/getRole?customerId=xxx
 exports.getRole = async (req, res) => {
   try {

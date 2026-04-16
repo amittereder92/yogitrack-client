@@ -1,179 +1,114 @@
-let formMode = "search";
-
 document.addEventListener("DOMContentLoaded", () => {
-  setFormForSearch();
-  initInstructorDropdown();
-  addInstructorDropdownListener();
+  loadInstructorDropdown();
+  addDropdownListener();
 });
 
-document.getElementById("searchBtn").addEventListener("click", async () => {
-  clearInstructorForm();
-  setFormForSearch();
-  initInstructorDropdown();
-});
-
-document.getElementById("addBtn").addEventListener("click", async () => {
-  setFormForAdd();
-});
-
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  const form = document.getElementById("instructorForm");
-
-  if (formMode === "add") {
-    const res = await fetch("/api/instructor/getNextId");
-    const { nextId } = await res.json();
-
-    const password = prompt("Set a portal login password for this instructor:");
-    if (!password) { alert("Password is required."); return; }
-    if (password.length < 6) { alert("Password must be at least 6 characters."); return; }
-
-    const instructorData = {
-      instructorId:     nextId,
-      firstname:        form.firstname.value.trim(),
-      lastname:         form.lastname.value.trim(),
-      address:          form.address.value.trim(),
-      phone:            form.phone.value.trim(),
-      email:            form.email.value.trim(),
-      preferredContact: form.pref[0].checked ? "phone" : "email",
-      password,
-    };
-
-    if (!instructorData.firstname || !instructorData.lastname || !instructorData.email || !instructorData.phone) {
-      alert("First name, last name, email and phone are required.");
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/instructor/add", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(instructorData),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to add instructor");
-      alert(`✅ Instructor ${nextId} added! They can log in with their email.`);
-      clearInstructorForm();
-      setFormForSearch();
-      initInstructorDropdown();
-    } catch (err) {
-      alert("❌ Error: " + err.message);
-    }
-
-  } else if (formMode === "search") {
-    const select     = document.getElementById("instructorIdSelect");
-    const instructorId = select.value;
-    if (!instructorId) { alert("Please select an instructor to update."); return; }
-
-    const instructorData = {
-      instructorId,
-      firstname:        form.firstname.value.trim(),
-      lastname:         form.lastname.value.trim(),
-      address:          form.address.value.trim(),
-      phone:            form.phone.value.trim(),
-      email:            form.email.value.trim(),
-      preferredContact: form.pref[0].checked ? "phone" : "email",
-    };
-
-    try {
-      const res = await fetch("/api/instructor/update", {
-        method:  "PUT",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(instructorData),
-      });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to update instructor");
-      alert(`✅ Instructor ${instructorId} updated successfully!`);
-    } catch (err) {
-      alert("❌ Error: " + err.message);
-    }
-  }
-});
-
-document.getElementById("deleteBtn").addEventListener("click", async () => {
-  const select     = document.getElementById("instructorIdSelect");
-  const instructorId = select.value;
-  if (!instructorId) { alert("Please select an instructor to delete."); return; }
-  if (!confirm(`Delete instructor ${instructorId}?`)) return;
-
-  try {
-    const response = await fetch(
-      `/api/instructor/deleteInstructor?instructorId=${instructorId}`,
-      { method: "DELETE" }
-    );
-    if (!response.ok) throw new Error("Instructor delete failed");
-    alert(`✅ Instructor ${instructorId} successfully deleted`);
-    clearInstructorForm();
-    initInstructorDropdown();
-  } catch (err) {
-    alert("❌ Error: " + err.message);
-  }
-});
-
-async function initInstructorDropdown() {
+async function loadInstructorDropdown() {
   const select = document.getElementById("instructorIdSelect");
   select.innerHTML = '<option value="">-- Select Instructor --</option>';
   try {
-    const response   = await fetch("/api/instructor/getInstructorIds");
-    const instructors = await response.json();
-    instructors.forEach((instr) => {
+    // Get all customers with instructor role
+    const res       = await fetch("/api/customer/getInstructors");
+    const instructors = await res.json();
+    instructors.forEach((c) => {
       const option = document.createElement("option");
-      option.value = instr.instructorId;
-      option.textContent = `${instr.instructorId}: ${instr.firstname} ${instr.lastname}`;
+      option.value = c.customerId;
+      option.textContent = `${c.customerId}: ${c.firstName} ${c.lastName}`;
       select.appendChild(option);
     });
   } catch (err) {
-    console.error("Failed to load instructor IDs:", err);
+    console.error("Failed to load instructors:", err);
   }
 }
 
-async function addInstructorDropdownListener() {
-  const form   = document.getElementById("instructorForm");
+async function addDropdownListener() {
   const select = document.getElementById("instructorIdSelect");
-
   select.addEventListener("change", async () => {
-    const instructorId = select.value;
-    if (!instructorId) return;
+    const customerId = select.value;
+    if (!customerId) { clearForm(); return; }
 
     try {
-      const res  = await fetch(`/api/instructor/getInstructor?instructorId=${instructorId}`);
-      if (!res.ok) throw new Error("Instructor search failed");
+      const res  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
       const data = await res.json();
-      if (!data || Object.keys(data).length === 0) { alert("No instructor found"); return; }
+      if (!data) { alert("No customer found"); return; }
 
-      form.firstname.value = data.firstname || "";
-      form.lastname.value  = data.lastname  || "";
-      form.address.value   = data.address   || "";
-      form.phone.value     = data.phone     || "";
-      form.email.value     = data.email     || "";
+      document.getElementById("firstName").value = data.firstName || "";
+      document.getElementById("lastName").value  = data.lastName  || "";
+      document.getElementById("email").value     = data.email     || "";
+      document.getElementById("phone").value     = data.phone     || "";
+      document.getElementById("address").value   = data.address   || "";
 
-      if (data.preferredContact === "phone") form.pref[0].checked = true;
-      else form.pref[1].checked = true;
+      const prefRadios = document.querySelectorAll('input[name="pref"]');
+      prefRadios.forEach(r => { r.checked = r.value === data.preferredContact; });
+
     } catch (err) {
       alert(`Error loading instructor: ${err.message}`);
     }
   });
 }
 
-function clearInstructorForm() {
-  document.getElementById("instructorForm").reset();
-  document.getElementById("instructorIdSelect").innerHTML = '<option value="">-- Select Instructor --</option>';
-}
+// SAVE — update phone, address, preferred contact
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  const customerId = document.getElementById("instructorIdSelect").value;
+  if (!customerId) { alert("Please select an instructor."); return; }
 
-function setFormForSearch() {
-  formMode = "search";
-  document.getElementById("instructorIdLabel").style.display     = "block";
-  document.getElementById("instructorIdTextLabel").style.display = "none";
-  document.getElementById("instructorIdText").value              = "";
-  document.getElementById("instructorIdText").style.display      = "none";
-  document.getElementById("addBtn").disabled = false;
-  document.getElementById("instructorForm").reset();
-}
+  const pref = document.querySelector('input[name="pref"]:checked');
+  const body = {
+    phone:            document.getElementById("phone").value.trim(),
+    address:          document.getElementById("address").value.trim(),
+    preferredContact: pref ? pref.value : "email",
+  };
 
-function setFormForAdd() {
-  formMode = "add";
-  document.getElementById("instructorIdLabel").style.display     = "none";
-  document.getElementById("instructorIdTextLabel").style.display = "block";
-  document.getElementById("instructorIdText").value              = "";
-  document.getElementById("addBtn").disabled = true;
-  document.getElementById("instructorForm").reset();
+  try {
+    // Get full customer data first to avoid overwriting fields
+    const getRes  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
+    const current = await getRes.json();
+
+    const res = await fetch(`/api/customer/update?customerId=${customerId}`, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ ...current, ...body }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Failed to update");
+    alert(`✅ Instructor updated successfully!`);
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
+// REMOVE INSTRUCTOR ROLE — demote back to customer
+document.getElementById("removeRoleBtn").addEventListener("click", async () => {
+  const customerId = document.getElementById("instructorIdSelect").value;
+  if (!customerId) { alert("Please select an instructor."); return; }
+
+  const name = `${document.getElementById("firstName").value} ${document.getElementById("lastName").value}`;
+  if (!confirm(`Remove instructor role from ${name}? They will become a regular customer.`)) return;
+
+  try {
+    const getRes  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
+    const current = await getRes.json();
+
+    const res = await fetch(`/api/customer/update?customerId=${customerId}`, {
+      method:  "PUT",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ ...current, role: "customer" }),
+    });
+    if (!res.ok) throw new Error("Failed to update role");
+    alert(`✅ ${name} has been changed back to a customer.`);
+    clearForm();
+    loadInstructorDropdown();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
+function clearForm() {
+  document.getElementById("instructorIdSelect").value = "";
+  document.getElementById("firstName").value = "";
+  document.getElementById("lastName").value  = "";
+  document.getElementById("email").value     = "";
+  document.getElementById("phone").value     = "";
+  document.getElementById("address").value   = "";
+  document.querySelectorAll('input[name="pref"]').forEach(r => r.checked = false);
 }
