@@ -274,6 +274,14 @@
     </div>
 
     <div class="login-field">
+      <label>Age Group</label>
+      <div class="radio-group">
+        <label><input type="checkbox" id="isUnder18"> Under 18</label>
+        <label><input type="checkbox" id="isOver62"> Over 62 (Senior)</label>
+      </div>
+    </div>
+
+    <div class="login-field">
       <label>Add to Mailing List?</label>
       <div class="radio-group">
         <label><input type="radio" name="mailingList" value="yes" checked> Yes</label>
@@ -366,6 +374,8 @@
       const emergencyPhone    = document.getElementById('emergencyPhone').value.trim();
       const referral          = document.getElementById('regReferral').value.trim();
       const mailingList       = document.querySelector('input[name="mailingList"]:checked')?.value === 'yes';
+      const isUnder18         = document.getElementById('isUnder18').checked;
+      const isOver62          = document.getElementById('isOver62').checked;
       const waiverAgree       = document.getElementById('waiverAgree').checked;
       const signature         = document.getElementById('regSignature').value.trim();
       const guardianSignature = document.getElementById('regGuardianSignature').value.trim();
@@ -401,7 +411,11 @@
         return;
       }
 
-      try {
+      if (isUnder18 && !guardianSignature) {
+        errorMsg.textContent = 'A parent/guardian signature is required for members under 18.';
+        errorMsg.style.display = 'block';
+        return;
+      }
         const fullAddress = [address, city, state, zip].filter(Boolean).join(', ');
         const res = await fetch('/api/auth/register', {
           method:  'POST',
@@ -413,6 +427,8 @@
             emergencyContact:  { name: emergencyName, phone: emergencyPhone },
             referral,
             mailingList,
+            isUnder18,
+            senior:            isOver62,
             waiverSigned:      true,
             waiverSignature:   signature,
             waiverDate:        new Date().toISOString(),
@@ -425,11 +441,21 @@
           errorMsg.style.display = 'block';
           return;
         }
-        successMsg.textContent = '✓ Registration complete! Redirecting to sign in…';
+        if (isUnder18) {
+          successMsg.innerHTML = `
+            <strong>✓ Registration complete!</strong><br><br>
+            Because this member is under 18, a parent or guardian must also
+            <strong>sign a physical waiver at the studio</strong> before participating
+            in their first class. Please ask for a waiver form at the front desk.<br><br>
+            Redirecting to sign in…
+          `;
+        } else {
+          successMsg.textContent = '✓ Registration complete! Redirecting to sign in…';
+        }
         successMsg.style.display = 'block';
         setTimeout(() => {
           window.location.href = '/index.html';
-        }, 2500);
+        }, 4000);
       } catch (err) {
         errorMsg.textContent = 'Could not connect to server. Please try again.';
         errorMsg.style.display = 'block';

@@ -73,7 +73,7 @@ const login = async (req, res) => {
 const register = async (req, res) => {
   const {
     firstName, lastName, email, phone, address, password,
-    emergencyContact, referral, mailingList,
+    emergencyContact, referral, mailingList, isUnder18, senior,
     waiverSigned, waiverSignature, waiverDate, guardianSignature,
   } = req.body;
 
@@ -112,6 +112,7 @@ const register = async (req, res) => {
       phone:            phone || "",
       address:          address || "",
       classBalance:     0,
+      senior:           senior || false,
       emergencyContact: emergencyContact || {},
       referral:         referral || "",
       mailingList:      mailingList || false,
