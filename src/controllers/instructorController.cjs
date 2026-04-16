@@ -48,7 +48,7 @@ exports.add = async (req, res) => {
     const newInstructor = new Instructor({ instructorId, firstname, lastname, address, phone, email, preferredContact });
     await newInstructor.save();
 
-    // Create portal login for instructor
+    // Create instructor portal login
     if (password && email) {
       const username     = email.trim().toLowerCase();
       const existingUser = await User.findOne({ username });
@@ -56,7 +56,7 @@ exports.add = async (req, res) => {
         const newUser = new User({
           username,
           password,
-          role:         "staff",
+          role:         "instructor",
           instructorId,
           displayName:  `${firstname} ${lastname}`,
         });

@@ -38,27 +38,37 @@ exports.getNextId = async (req, res) => {
   }
 };
 
+// GET /api/customer/getRole?customerId=xxx
+exports.getRole = async (req, res) => {
+  try {
+    const { customerId } = req.query;
+    const user = await User.findOne({ customerId });
+    if (!user) return res.json({ role: "customer" });
+    res.json({ role: user.role });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
 exports.add = async (req, res) => {
   try {
-    const { customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance, password } = req.body;
+    const { customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance, password, role } = req.body;
 
     if (!firstName || !lastName) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Create customer record
     const newCustomer = new Customer({ customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance });
     await newCustomer.save();
 
-    // Create user account for portal login if password and email provided
     if (password && email) {
-      const username = email.trim().toLowerCase();
+      const username     = email.trim().toLowerCase();
       const existingUser = await User.findOne({ username });
       if (!existingUser) {
         const newUser = new User({
           username,
           password,
-          role:        "customer",
+          role:        role || "customer",
           customerId,
           displayName: `${firstName} ${lastName}`,
         });
@@ -75,13 +85,24 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { customerId } = req.query;
-    const { firstName, lastName, email, phone, address, senior, preferredContact, classBalance } = req.body;
+    const { firstName, lastName, email, phone, address, senior, preferredContact, classBalance, role } = req.body;
+
     const updated = await Customer.findOneAndUpdate(
       { customerId },
       { firstName, lastName, email, phone, address, senior, preferredContact, classBalance },
       { new: true }
     );
     if (!updated) return res.status(404).json({ message: "Customer not found" });
+
+    // Update role in user account if role provided
+    if (role) {
+      await User.findOneAndUpdate(
+        { customerId },
+        { role },
+        { new: true }
+      );
+    }
+
     res.json({ message: "Customer updated", customer: updated });
   } catch (err) {
     res.status(500).json({ message: "Failed to update customer", error: err.message });
@@ -93,7 +114,6 @@ exports.deleteCustomer = async (req, res) => {
     const { customerId } = req.query;
     const result = await Customer.findOneAndDelete({ customerId });
     if (!result) return res.status(404).json({ error: "Customer not found" });
-    // Also delete their user account
     await User.findOneAndDelete({ customerId });
     res.json({ message: "Customer deleted", customerId });
   } catch (err) {

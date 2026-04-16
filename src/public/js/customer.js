@@ -6,19 +6,16 @@ document.addEventListener("DOMContentLoaded", () => {
   addCustomerDropdownListener();
 });
 
-// SEARCH
 document.getElementById("searchBtn").addEventListener("click", async () => {
   clearCustomerForm();
   setFormForSearch();
   initCustomerDropdown();
 });
 
-// ADD
 document.getElementById("addBtn").addEventListener("click", () => {
   setFormForAdd();
 });
 
-// SAVE
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const form = document.getElementById("customerForm");
 
@@ -26,8 +23,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     const res = await fetch("/api/customer/getNextId");
     const { nextId } = await res.json();
 
-    // Prompt for password
-    const password = prompt("Set a password for this customer's portal login:");
+    const password = prompt("Set a portal login password for this customer:");
     if (!password) { alert("Password is required."); return; }
     if (password.length < 6) { alert("Password must be at least 6 characters."); return; }
 
@@ -45,6 +41,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       preferredContact: pref ? pref.value : "email",
       classBalance:     parseInt(form.classBalance.value) || 0,
       password,
+      role:             document.getElementById("portalRole").value,
     };
 
     if (!customerData.firstName || !customerData.lastName) {
@@ -60,7 +57,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || "Failed to add customer");
-      alert(`✅ Customer ${nextId} added successfully! They can log in with their email and the password you set.`);
+      alert(`✅ Customer ${nextId} added successfully!`);
       clearCustomerForm();
       setFormForSearch();
       initCustomerDropdown();
@@ -85,6 +82,7 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
       senior:           senior ? senior.value === "true" : false,
       preferredContact: pref ? pref.value : "email",
       classBalance:     parseInt(document.getElementById("classBalance").value) || 0,
+      role:             document.getElementById("portalRole").value,
     };
 
     try {
@@ -102,7 +100,6 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   }
 });
 
-// DELETE
 document.getElementById("deleteBtn").addEventListener("click", async () => {
   const select     = document.getElementById("customerIdSelect");
   const customerId = select.value;
@@ -164,6 +161,17 @@ async function addCustomerDropdownListener() {
       const prefRadios = form.querySelectorAll('input[name="preferredContact"]');
       prefRadios.forEach(r => { r.checked = r.value === data.preferredContact; });
 
+      // Load current role from user account
+      try {
+        const userRes  = await fetch(`/api/customer/getRole?customerId=${customerId}`);
+        const userData = await userRes.json();
+        if (userData.role) {
+          document.getElementById("portalRole").value = userData.role;
+        }
+      } catch (e) {
+        document.getElementById("portalRole").value = "customer";
+      }
+
     } catch (err) {
       alert(`Error loading customer: ${err.message}`);
     }
@@ -173,6 +181,7 @@ async function addCustomerDropdownListener() {
 function clearCustomerForm() {
   document.getElementById("customerForm").reset();
   document.getElementById("customerIdSelect").innerHTML = '<option value="">-- Select Customer --</option>';
+  document.getElementById("portalRole").value = "customer";
 }
 
 function setFormForSearch() {
@@ -183,6 +192,7 @@ function setFormForSearch() {
   document.getElementById("customerIdText").value              = "";
   document.getElementById("addBtn").disabled = false;
   document.getElementById("customerForm").reset();
+  document.getElementById("portalRole").value = "customer";
 }
 
 function setFormForAdd() {
@@ -192,4 +202,5 @@ function setFormForAdd() {
   document.getElementById("customerIdText").value              = "";
   document.getElementById("addBtn").disabled = true;
   document.getElementById("customerForm").reset();
+  document.getElementById("portalRole").value = "customer";
 }

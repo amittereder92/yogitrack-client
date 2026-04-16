@@ -26,7 +26,6 @@
           <a href="schedule.html">Schedule</a>
           <a href="customer.html" class="active">Customers</a>
           <a href="checkin.html">Check-ins</a>
-          <a href="reports.html">Reports</a>
         </div>
         <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
@@ -76,6 +75,15 @@
               <label><input type="radio" name="preferredContact" value="email"> Email</label>
             </div>
           </fieldset>
+
+          <!-- Portal Role -->
+          <label>Portal Role
+            <select id="portalRole" class="form-input styled-select">
+              <option value="customer">Customer</option>
+              <option value="instructor">Instructor</option>
+              <option value="staff">Admin / Staff</option>
+            </select>
+          </label>
 
           <div class="btn-row">
             <button type="button" class="btn" id="searchBtn">Search</button>
