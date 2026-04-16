@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express    = require("express");
 const session    = require("express-session");
-const MongoStore = require("connect-mongo").default;
+const MongoStore = require("connect-mongo").default;;
 const app        = express();
 
 require("./config/mongodbconn.cjs");
@@ -25,12 +25,6 @@ app.use(session({
   }
 }));
 
-// Prevent API response caching
-app.use('/api', (req, res, next) => {
-  res.set('Cache-Control', 'no-store');
-  next();
-});
-
 // Routes
 app.use("/api/auth",       require("./routes/authRoutes.cjs"));
 app.use("/api/portal",     require("./routes/customerPortalRoutes.cjs"));
@@ -41,7 +35,6 @@ app.use("/api/package",    require("./routes/packageRoutes.cjs"));
 app.use("/api/schedule",   require("./routes/scheduleRoutes.cjs"));
 app.use("/api/customer",   require("./routes/customerRoutes.cjs"));
 app.use("/api/checkin",    require("./routes/checkinRoutes.cjs"));
-app.use("/api/sales",      require("./routes/salesRoutes.cjs"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
