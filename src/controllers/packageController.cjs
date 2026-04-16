@@ -12,7 +12,10 @@ exports.getPackage = async (req, res) => {
 
 exports.getPackageIds = async (req, res) => {
   try {
-    const packages = await Package.find({}, { packageId: 1, packageName: 1, _id: 0 }).sort({ packageId: 1 });
+    const packages = await Package.find(
+      {},
+      { packageId: 1, packageName: 1, price: 1, classCount: 1, _id: 0 }
+    ).sort({ packageId: 1 });
     res.json(packages);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -39,11 +42,11 @@ exports.getNextId = async (req, res) => {
 
 exports.add = async (req, res) => {
   try {
-    const { packageId, packageName, description, price } = req.body;
+    const { packageId, packageName, description, price, classCount } = req.body;
     if (!packageName || price === undefined) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    const newPackage = new Package({ packageId, packageName, description, price });
+    const newPackage = new Package({ packageId, packageName, description, price, classCount: parseInt(classCount) || 0 });
     await newPackage.save();
     res.status(201).json({ message: "Package added successfully", package: newPackage });
   } catch (err) {
@@ -54,10 +57,10 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { packageId } = req.query;
-    const { packageName, description, price } = req.body;
+    const { packageName, description, price, classCount } = req.body;
     const updated = await Package.findOneAndUpdate(
       { packageId },
-      { packageName, description, price },
+      { packageName, description, price, classCount: parseInt(classCount) || 0 },
       { new: true }
     );
     if (!updated) return res.status(404).json({ message: "Package not found" });
