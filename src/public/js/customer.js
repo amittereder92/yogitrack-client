@@ -1,13 +1,12 @@
-let formMode = "search";
+let formMode    = "search";
 let allPackages = [];
+let customerChoices = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setFormForSearch();
   initCustomerDropdown();
-  addCustomerDropdownListener();
   loadPackages();
 
-  // Instructor search button
   const instrSearch = document.getElementById("instrSearchBtn");
   if (instrSearch) {
     instrSearch.addEventListener("click", () => {
@@ -53,7 +52,7 @@ document.getElementById("saveBtn")?.addEventListener("click", async () => {
       preferredContact: pref ? pref.value : "email",
       classBalance:     parseInt(form.classBalance.value) || 0,
       password,
-      role:             document.getElementById("portalRole").value,
+      role:             document.getElementById("portalRole")?.value || "customer",
     };
 
     if (!customerData.firstName || !customerData.lastName) {
@@ -62,13 +61,13 @@ document.getElementById("saveBtn")?.addEventListener("click", async () => {
     }
 
     try {
-      const res = await fetch("/api/customer/add", {
+      const saveRes = await fetch("/api/customer/add", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(customerData),
       });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to add customer");
+      const result = await saveRes.json();
+      if (!saveRes.ok) throw new Error(result.message || "Failed to add customer");
       alert(`✅ Customer ${nextId} added successfully!`);
       clearCustomerForm();
       setFormForSearch();
@@ -78,12 +77,11 @@ document.getElementById("saveBtn")?.addEventListener("click", async () => {
     }
 
   } else if (formMode === "search") {
-    const select     = document.getElementById("customerIdSelect");
-    const customerId = select.value;
+    const customerId = document.getElementById("customerIdSelect").value;
     if (!customerId) { alert("Please select a customer to update."); return; }
 
-    const senior = document.getElementById("customerForm").querySelector('input[name="senior"]:checked');
-    const pref   = document.getElementById("customerForm").querySelector('input[name="preferredContact"]:checked');
+    const senior = form.querySelector('input[name="senior"]:checked');
+    const pref   = form.querySelector('input[name="preferredContact"]:checked');
 
     const customerData = {
       firstName:        document.getElementById("firstName").value.trim(),
@@ -113,8 +111,7 @@ document.getElementById("saveBtn")?.addEventListener("click", async () => {
 });
 
 document.getElementById("deleteBtn")?.addEventListener("click", async () => {
-  const select     = document.getElementById("customerIdSelect");
-  const customerId = select.value;
+  const customerId = document.getElementById("customerIdSelect").value;
   if (!customerId) { alert("Please select a customer to delete."); return; }
   if (!confirm(`Delete customer ${customerId}?`)) return;
 
@@ -130,77 +127,93 @@ document.getElementById("deleteBtn")?.addEventListener("click", async () => {
 });
 
 async function initCustomerDropdown() {
-  const select = document.getElementById("customerIdSelect");
-  select.innerHTML = '<option value="">-- Select Customer --</option>';
   try {
     const res       = await fetch("/api/customer/getCustomerIds");
     const customers = await res.json();
+
+    // Destroy existing Choices instance if it exists
+    if (customerChoices) {
+      customerChoices.destroy();
+      customerChoices = null;
+    }
+
+    const select = document.getElementById("customerIdSelect");
+    select.innerHTML = '<option value="">-- Select Customer --</option>';
     customers.forEach((c) => {
       const option = document.createElement("option");
       option.value = c.customerId;
-      option.textContent = `${c.customerId}: ${c.firstName} ${c.lastName}`;
+      option.textContent = `${c.firstName} ${c.lastName} (${c.customerId})`;
       select.appendChild(option);
     });
+
+    // Init Choices.js
+    customerChoices = new Choices(select, {
+      searchEnabled:       true,
+      searchPlaceholderValue: "Type to search…",
+      itemSelectText:      "",
+      shouldSort:          false,
+      placeholder:         true,
+      placeholderValue:    "-- Select Customer --",
+    });
+
+    // Listen for selection
+    select.addEventListener("change", handleCustomerChange);
+
   } catch (err) {
     console.error("Failed to load customer IDs:", err);
   }
 }
 
-async function addCustomerDropdownListener() {
-  const form   = document.getElementById("customerForm");
-  const select = document.getElementById("customerIdSelect");
+async function handleCustomerChange() {
+  const customerId = document.getElementById("customerIdSelect").value;
+  if (!customerId) {
+    document.getElementById("packageSaleSection").style.display = "none";
+    return;
+  }
 
-  select.addEventListener("change", async () => {
-    const customerId = select.value;
-    if (!customerId) {
-      document.getElementById("packageSaleSection").style.display = "none";
-      return;
-    }
+  try {
+    const res  = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
+    if (!res.ok) throw new Error("Customer search failed");
+    const data = await res.json();
+    if (!data) { alert("No customer found"); return; }
+
+    const form = document.getElementById("customerForm");
+    document.getElementById("firstName").value    = data.firstName    || "";
+    document.getElementById("lastName").value     = data.lastName     || "";
+    document.getElementById("email").value        = data.email        || "";
+    document.getElementById("phone").value        = data.phone        || "";
+    document.getElementById("address").value      = data.address      || "";
+    document.getElementById("classBalance").value = data.classBalance || 0;
+
+    form.querySelectorAll('input[name="senior"]').forEach(r => {
+      r.checked = r.value === String(data.senior);
+    });
+    form.querySelectorAll('input[name="preferredContact"]').forEach(r => {
+      r.checked = r.value === data.preferredContact;
+    });
 
     try {
-      const res = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
-      if (!res.ok) throw new Error("Customer search failed");
-      const data = await res.json();
-      if (!data) { alert("No customer found"); return; }
-
-      document.getElementById("firstName").value    = data.firstName    || "";
-      document.getElementById("lastName").value     = data.lastName     || "";
-      document.getElementById("email").value        = data.email        || "";
-      document.getElementById("phone").value        = data.phone        || "";
-      document.getElementById("address").value      = data.address      || "";
-      document.getElementById("classBalance").value = data.classBalance || 0;
-
-      const seniorRadios = form.querySelectorAll('input[name="senior"]');
-      seniorRadios.forEach(r => { r.checked = r.value === String(data.senior); });
-
-      const prefRadios = form.querySelectorAll('input[name="preferredContact"]');
-      prefRadios.forEach(r => { r.checked = r.value === data.preferredContact; });
-
-      try {
-        const userRes  = await fetch(`/api/customer/getRole?customerId=${customerId}`);
-        const userData = await userRes.json();
-        if (userData.role && document.getElementById("portalRole")) {
-          document.getElementById("portalRole").value = userData.role;
-        }
-      } catch (e) {
-        if (document.getElementById("portalRole"))
-          document.getElementById("portalRole").value = "customer";
+      const userRes  = await fetch(`/api/customer/getRole?customerId=${customerId}`);
+      const userData = await userRes.json();
+      if (userData.role && document.getElementById("portalRole")) {
+        document.getElementById("portalRole").value = userData.role;
       }
-
-      // Show package sale section
-      document.getElementById("packageSaleSection").style.display = "block";
-      document.getElementById("saleCustomerName").textContent =
-        `Selling to: ${data.firstName} ${data.lastName} — Current balance: ${data.classBalance || 0} classes`;
-      clearSaleForm();
-      loadSaleHistory(customerId);
-
-    } catch (err) {
-      alert(`Error loading customer: ${err.message}`);
+    } catch (e) {
+      if (document.getElementById("portalRole"))
+        document.getElementById("portalRole").value = "customer";
     }
-  });
+
+    document.getElementById("packageSaleSection").style.display = "block";
+    document.getElementById("saleCustomerName").textContent =
+      `Selling to: ${data.firstName} ${data.lastName} — Current balance: ${data.classBalance || 0} classes`;
+    clearSaleForm();
+    loadSaleHistory(customerId);
+
+  } catch (err) {
+    alert(`Error loading customer: ${err.message}`);
+  }
 }
 
-// Load all packages into the sale dropdown
 async function loadPackages() {
   try {
     const res  = await fetch("/api/package/getPackageIds");
@@ -219,55 +232,43 @@ async function loadPackages() {
   }
 }
 
-// Auto-fill classes and price when package is selected
 function onPackageSelected() {
   const sel = document.getElementById("salePackageSelect");
   const opt = sel.options[sel.selectedIndex];
   if (!opt.value) return;
-
   const classCount = document.getElementById("saleClassesCount");
   const amountPaid = document.getElementById("saleAmountPaid");
   if (classCount) classCount.value = opt.dataset.classes || "";
   if (amountPaid) amountPaid.value = opt.dataset.price   || "";
 }
 
-// Sell package
 async function sellPackage() {
   const customerId    = document.getElementById("customerIdSelect").value;
   const packageId     = document.getElementById("salePackageSelect").value;
   const classesCount  = document.getElementById("saleClassesCount")?.value;
   const amountPaid    = document.getElementById("saleAmountPaid")?.value;
   const paymentMethod = document.getElementById("salePaymentMethod")?.value || "cash";
-  const feedback      = document.getElementById("saleFeedback");
 
   if (!customerId) { showSaleFeedback("Please select a customer first.", false); return; }
   if (!packageId)  { showSaleFeedback("Please select a package.", false); return; }
 
   try {
-    const res  = await fetch("/api/sales/sell", {
+    const res = await fetch("/api/sales/sell", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({
-        customerId,
-        packageId,
-        classesAdded:  classesCount,
-        amountPaid:    amountPaid,
-        paymentMethod,
-      }),
+      body:    JSON.stringify({ customerId, packageId, classesAdded: classesCount, amountPaid, paymentMethod }),
     });
     const data = await res.json();
     if (!res.ok || !data.success) {
       showSaleFeedback(data.error || "Sale failed.", false);
       return;
     }
-
     showSaleFeedback(`✅ Sale recorded! New balance: ${data.newBalance} classes.`, true);
     document.getElementById("classBalance").value = data.newBalance;
     document.getElementById("saleCustomerName").textContent =
       `Selling to: ${document.getElementById("firstName").value} ${document.getElementById("lastName").value} — Current balance: ${data.newBalance} classes`;
     clearSaleForm();
     loadSaleHistory(customerId);
-
   } catch (err) {
     showSaleFeedback("Could not connect. Please try again.", false);
   }
@@ -289,10 +290,8 @@ async function loadSaleHistory(customerId) {
     const tbody = document.getElementById("saleHistoryBody");
     const empty = document.getElementById("saleHistoryEmpty");
     tbody.innerHTML = "";
-
     if (!sales.length) { empty.style.display = "block"; return; }
     empty.style.display = "none";
-
     sales.forEach(s => {
       const dt = new Date(s.saleDate).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
       const tr = document.createElement("tr");
@@ -312,19 +311,25 @@ async function loadSaleHistory(customerId) {
 
 function clearSaleForm() {
   document.getElementById("salePackageSelect").value = "";
-  const classesCount = document.getElementById("saleClassesCount");
-  const amountPaid   = document.getElementById("saleAmountPaid");
-  if (classesCount) classesCount.value = "";
-  if (amountPaid)   amountPaid.value   = "";
+  const cc = document.getElementById("saleClassesCount");
+  const ap = document.getElementById("saleAmountPaid");
+  if (cc) cc.value = "";
+  if (ap) ap.value = "";
   document.getElementById("saleFeedback").style.display = "none";
 }
 
 function clearCustomerForm() {
   document.getElementById("customerForm").reset();
-  document.getElementById("customerIdSelect").innerHTML = '<option value="">-- Select Customer --</option>';
+  if (customerChoices) {
+    customerChoices.destroy();
+    customerChoices = null;
+  }
+  const select = document.getElementById("customerIdSelect");
+  select.innerHTML = '<option value="">-- Select Customer --</option>';
   if (document.getElementById("portalRole"))
     document.getElementById("portalRole").value = "customer";
   document.getElementById("packageSaleSection").style.display = "none";
+  initCustomerDropdown();
 }
 
 function setFormForSearch() {
