@@ -416,6 +416,8 @@
         errorMsg.style.display = 'block';
         return;
       }
+
+      try {
         const fullAddress = [address, city, state, zip].filter(Boolean).join(', ');
         const res = await fetch('/api/auth/register', {
           method:  'POST',
