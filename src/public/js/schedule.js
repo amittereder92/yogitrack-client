@@ -126,7 +126,6 @@ document.getElementById("generateQrBtn").addEventListener("click", async () => {
 });
 
 function showQrModal(qrDataUrl, className, validUntil) {
-  // Remove existing modal if any
   const existing = document.getElementById("qrModal");
   if (existing) existing.remove();
 
@@ -186,15 +185,16 @@ async function initClassDropdown() {
   }
 }
 
+// FIXED: now uses customer-based instructor list
 async function initInstructorDropdown() {
   const select = document.getElementById("instructorId");
   try {
-    const res        = await fetch("/api/instructor/getInstructorIds");
+    const res         = await fetch("/api/customer/getInstructors");
     const instructors = await res.json();
     instructors.forEach((instr) => {
       const option = document.createElement("option");
-      option.value = instr.instructorId;
-      option.textContent = `${instr.instructorId}: ${instr.firstname} ${instr.lastname}`;
+      option.value = instr.customerId;
+      option.textContent = `${instr.customerId}: ${instr.firstName} ${instr.lastName}`;
       select.appendChild(option);
     });
   } catch (err) {
