@@ -71,7 +71,11 @@ const login = async (req, res) => {
 
 // POST /api/auth/register
 const register = async (req, res) => {
-  const { firstName, lastName, email, phone, password } = req.body;
+  const {
+    firstName, lastName, email, phone, address, password,
+    emergencyContact, referral, mailingList,
+    waiverSigned, waiverSignature, waiverDate, guardianSignature,
+  } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ error: "All fields are required." });
@@ -87,6 +91,7 @@ const register = async (req, res) => {
       return res.status(400).json({ error: "An account with this email already exists." });
     }
 
+    // Get next customer ID
     const customers  = await Customer.find({});
     let maxNumber    = 0;
     customers.forEach((c) => {
@@ -98,16 +103,26 @@ const register = async (req, res) => {
     });
     const customerId = `Y${String(maxNumber + 1).padStart(3, "0")}`;
 
+    // Create customer record with all registration fields
     const newCustomer = new Customer({
       customerId,
-      firstName: firstName.trim(),
-      lastName:  lastName.trim(),
-      email:     username,
-      phone:     phone || "",
-      classBalance: 0,
+      firstName:        firstName.trim(),
+      lastName:         lastName.trim(),
+      email:            username,
+      phone:            phone || "",
+      address:          address || "",
+      classBalance:     0,
+      emergencyContact: emergencyContact || {},
+      referral:         referral || "",
+      mailingList:      mailingList || false,
+      waiverSigned:     waiverSigned || false,
+      waiverSignature:  waiverSignature || "",
+      waiverDate:       waiverDate || null,
+      guardianSignature: guardianSignature || "",
     });
     await newCustomer.save();
 
+    // Create user account
     const newUser = new User({
       username,
       password,
