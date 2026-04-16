@@ -32,6 +32,8 @@
       </nav>
 
       <div class="content-panel">
+
+        <!-- Customer Details Form -->
         <form class="card card--wide" id="customerForm">
           <h2>Customer Details</h2>
 
@@ -77,7 +79,8 @@
             </div>
           </fieldset>
 
-          <label>Portal Role
+          <!-- Staff only: portal role -->
+          <label id="portalRoleLabel">Portal Role
             <select id="portalRole" class="form-input styled-select">
               <option value="customer">Customer</option>
               <option value="instructor">Instructor</option>
@@ -85,7 +88,7 @@
             </select>
           </label>
 
-          <div class="btn-row">
+          <div class="btn-row" id="staffBtns">
             <button type="button" class="btn" id="searchBtn">Search</button>
             <button type="button" class="btn btn--primary" id="addBtn">Add New</button>
             <button type="button" class="btn" id="saveBtn">Save</button>
@@ -93,18 +96,101 @@
             <button type="button" class="btn" onclick="clearCustomerForm()">Clear</button>
             <a href="dashboard.html" class="btn">Exit</a>
           </div>
-        </form>
-      </div>
 
+          <!-- Instructor only buttons -->
+          <div class="btn-row" id="instructorBtns" style="display:none;">
+            <button type="button" class="btn" id="instrSearchBtn">Search</button>
+            <button type="button" class="btn" onclick="clearCustomerForm()">Clear</button>
+            <a href="../htmls/instructor-portal.html" class="btn">Exit</a>
+          </div>
+        </form>
+
+        <!-- Package Sale Section (shown when customer is selected) -->
+        <div class="card card--wide" id="packageSaleSection" style="display:none;">
+          <h2>Sell Package</h2>
+          <p id="saleCustomerName" style="font-family:'Lato',sans-serif; font-size:13px; color:#7a8c6e; margin:-0.5rem 0 1rem;"></p>
+
+          <div class="grid-2">
+            <label>Package
+              <select id="salePackageSelect" class="form-input styled-select" onchange="onPackageSelected()">
+                <option value="">-- Select Package --</option>
+              </select>
+            </label>
+            <!-- Staff only: editable classes -->
+            <label id="saleClassesLabel">Classes to Add
+              <input type="number" id="saleClassesCount" min="1" class="form-input" placeholder="0">
+            </label>
+          </div>
+
+          <!-- Staff only: payment details -->
+          <div id="salePaymentSection">
+            <div class="grid-2">
+              <label>Amount Paid ($)
+                <input type="number" id="saleAmountPaid" min="0" step="0.01" class="form-input" placeholder="0.00">
+              </label>
+              <label>Payment Method
+                <select id="salePaymentMethod" class="form-input styled-select">
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div id="saleFeedback" style="display:none; margin-bottom:1rem; padding:0.6rem 0.85rem; border-radius:4px; font-family:'Lato',sans-serif; font-size:13px;"></div>
+
+          <div class="btn-row">
+            <button type="button" class="btn btn--primary" onclick="sellPackage()">Sell Package</button>
+            <button type="button" class="btn" onclick="clearSaleForm()">Clear</button>
+          </div>
+
+          <!-- Sale history -->
+          <div style="margin-top:1.5rem;">
+            <h3 style="font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0 0 0.75rem;">Purchase History</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Package</th>
+                  <th>Classes</th>
+                  <th>Amount</th>
+                  <th>Method</th>
+                </tr>
+              </thead>
+              <tbody id="saleHistoryBody"></tbody>
+            </table>
+            <div id="saleHistoryEmpty" style="font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:8px 0; display:none;">No purchases yet.</div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
   <script>
+    let currentUserRole = 'staff';
+
     (async function() {
       const res  = await fetch('/api/auth/me');
       const data = await res.json();
-      if (!data.loggedIn || data.user.role !== 'staff') {
+      if (!data.loggedIn || (data.user.role !== 'staff' && data.user.role !== 'instructor')) {
         window.location.href = '/index.html';
+        return;
+      }
+      currentUserRole = data.user.role;
+
+      // Show/hide role-specific elements
+      if (currentUserRole === 'instructor') {
+        document.getElementById('staffBtns').style.display       = 'none';
+        document.getElementById('instructorBtns').style.display  = 'flex';
+        document.getElementById('portalRoleLabel').style.display = 'none';
+        document.getElementById('saleClassesLabel').style.display   = 'none';
+        document.getElementById('salePaymentSection').style.display = 'none';
+        // Make customer fields readonly for instructors
+        ['firstName','lastName','email','phone','address','classBalance'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.readOnly = true; el.style.background = '#f0ebe4'; }
+        });
       }
     })();
 

@@ -6,19 +6,16 @@ document.addEventListener("DOMContentLoaded", () => {
   addPackageDropdownListener();
 });
 
-// SEARCH
 document.getElementById("searchBtn").addEventListener("click", () => {
   clearPackageForm();
   setFormForSearch();
   initPackageDropdown();
 });
 
-// ADD
 document.getElementById("addBtn").addEventListener("click", () => {
   setFormForAdd();
 });
 
-// SAVE
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const form = document.getElementById("packageForm");
 
@@ -27,17 +24,18 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     const { nextId } = await res.json();
 
     const packageData = {
-      packageId: nextId,
+      packageId:   nextId,
       packageName: form.packageName.value.trim(),
       description: form.description.value.trim(),
-      price: parseFloat(form.price.value),
+      price:       parseFloat(form.price.value) || 0,
+      classCount:  parseInt(form.classCount.value) || 0,
     };
 
     try {
       const saveRes = await fetch("/api/package/add", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(packageData),
+        body:    JSON.stringify(packageData),
       });
       const result = await saveRes.json();
       if (!saveRes.ok) throw new Error(result.message || "Failed to add package");
@@ -54,14 +52,15 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     const packageData = {
       packageName: form.packageName.value.trim(),
       description: form.description.value.trim(),
-      price: parseFloat(form.price.value),
+      price:       parseFloat(form.price.value) || 0,
+      classCount:  parseInt(form.classCount.value) || 0,
     };
 
     try {
       const updateRes = await fetch(`/api/package/update?packageId=${packageId}`, {
-        method: "PUT",
+        method:  "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(packageData),
+        body:    JSON.stringify(packageData),
       });
       const result = await updateRes.json();
       if (!updateRes.ok) throw new Error(result.message || "Failed to update package");
@@ -75,17 +74,14 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   }
 });
 
-// DELETE
 document.getElementById("deleteBtn").addEventListener("click", async () => {
-  const select = document.getElementById("packageIdSelect");
+  const select    = document.getElementById("packageIdSelect");
   const packageId = select.value;
   if (!packageId) { alert("Please select a package to delete."); return; }
   if (!confirm(`Delete package ${packageId}? This cannot be undone.`)) return;
 
   try {
-    const res = await fetch(`/api/package/deletePackage?packageId=${packageId}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`/api/package/deletePackage?packageId=${packageId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Package delete failed");
     alert(`✅ Package ${packageId} deleted.`);
     clearPackageForm();
@@ -100,7 +96,7 @@ async function initPackageDropdown() {
   const select = document.getElementById("packageIdSelect");
   select.innerHTML = '<option value=""> -- Select Package -- </option>';
   try {
-    const res = await fetch("/api/package/getPackageIds");
+    const res      = await fetch("/api/package/getPackageIds");
     const packages = await res.json();
     packages.forEach((pkg) => {
       const option = document.createElement("option");
@@ -114,7 +110,7 @@ async function initPackageDropdown() {
 }
 
 async function addPackageDropdownListener() {
-  const form = document.getElementById("packageForm");
+  const form   = document.getElementById("packageForm");
   const select = document.getElementById("packageIdSelect");
 
   select.addEventListener("change", async () => {
@@ -122,17 +118,15 @@ async function addPackageDropdownListener() {
     if (!packageId) return;
 
     try {
-      const res = await fetch(`/api/package/getPackage?packageId=${packageId}`);
+      const res  = await fetch(`/api/package/getPackage?packageId=${packageId}`);
       if (!res.ok) throw new Error("Package search failed");
       const data = await res.json();
-      if (!data || Object.keys(data).length === 0) {
-        alert("No package found");
-        return;
-      }
+      if (!data || Object.keys(data).length === 0) { alert("No package found"); return; }
 
       form.packageName.value = data.packageName || "";
       form.description.value = data.description || "";
-      form.price.value = data.price || "";
+      form.price.value       = data.price       || "";
+      form.classCount.value  = data.classCount  || "";
 
       formMode = "edit";
       document.getElementById("packageIdText").value = packageId;
@@ -150,19 +144,19 @@ function clearPackageForm() {
 
 function setFormForSearch() {
   formMode = "search";
-  document.getElementById("packageIdLabel").style.display = "block";
+  document.getElementById("packageIdLabel").style.display     = "block";
   document.getElementById("packageIdTextLabel").style.display = "none";
-  document.getElementById("packageIdText").style.display = "none";
-  document.getElementById("packageIdText").value = "";
+  document.getElementById("packageIdText").style.display      = "none";
+  document.getElementById("packageIdText").value              = "";
   document.getElementById("packageForm").reset();
 }
 
 function setFormForAdd() {
   formMode = "add";
-  document.getElementById("packageIdLabel").style.display = "none";
+  document.getElementById("packageIdLabel").style.display     = "none";
   document.getElementById("packageIdTextLabel").style.display = "block";
   document.getElementById("packageIdText").removeAttribute("hidden");
-  document.getElementById("packageIdText").style.display = "block";
-  document.getElementById("packageIdText").value = "Auto-generated";
+  document.getElementById("packageIdText").style.display      = "block";
+  document.getElementById("packageIdText").value              = "Auto-generated";
   document.getElementById("packageForm").reset();
 }

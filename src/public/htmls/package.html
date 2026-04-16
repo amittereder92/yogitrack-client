@@ -46,7 +46,11 @@
 
           <label>Package Name <input type="text" name="packageName" id="packageName"></label>
           <label>Description  <textarea name="description" id="description" rows="2"></textarea></label>
-          <label>Price ($)    <input type="number" name="price" id="price" step="0.01" min="0"></label>
+
+          <div class="grid-2">
+            <label>Price ($) <input type="number" name="price" id="price" step="0.01" min="0"></label>
+            <label>Number of Classes <input type="number" name="classCount" id="classCount" min="1" placeholder="e.g. 10"></label>
+          </div>
 
           <div class="btn-row">
             <button type="button" class="btn" id="searchBtn">Search</button>
