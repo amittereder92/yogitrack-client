@@ -1,6 +1,5 @@
 let formMode    = "search";
 let allPackages = [];
-let customerChoices = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setFormForSearch();

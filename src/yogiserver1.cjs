@@ -35,6 +35,7 @@ app.use("/api/package",    require("./routes/packageRoutes.cjs"));
 app.use("/api/schedule",   require("./routes/scheduleRoutes.cjs"));
 app.use("/api/customer",   require("./routes/customerRoutes.cjs"));
 app.use("/api/checkin",    require("./routes/checkinRoutes.cjs"));
+app.use("/api/sales",     require("./routes/salesRoutes.cjs"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
