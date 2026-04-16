@@ -37,7 +37,10 @@
         <form class="card card--wide" id="customerForm">
           <h2>Customer Details</h2>
 
-          <label id="customerIdLabel" for="customerIdSelect">Customer ID
+          <label id="customerIdLabel">Customer ID
+            <input type="text" id="customerSearch" placeholder="Type name or ID to filter…"
+            style="margin-bottom:0.4rem;"
+            oninput="filterCustomerDropdown(this.value)">
             <select name="customerId" id="customerIdSelect" class="form-input">
               <option value="">-- Select Customer --</option>
             </select>
