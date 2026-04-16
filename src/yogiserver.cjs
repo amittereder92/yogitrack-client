@@ -29,6 +29,7 @@ app.use(session({
 app.use("/api/auth",       require("./routes/authRoutes.cjs"));
 app.use("/api/portal",     require("./routes/customerPortalRoutes.cjs"));
 app.use("/api/qr",         require("./routes/qrRoutes.cjs"));
+app.use("/api/reports",    require("./routes/reportsRoutes.cjs"));
 app.use("/api/instructor", require("./routes/instructorRoutes.cjs"));
 app.use("/api/package",    require("./routes/packageRoutes.cjs"));
 app.use("/api/schedule",   require("./routes/scheduleRoutes.cjs"));
