@@ -196,24 +196,21 @@
 </div>
 
 <script>
-  // Auth check
+  // Auth check then auto-load reports
   (async function() {
     const res  = await fetch('/api/auth/me');
     const data = await res.json();
     if (!data.loggedIn || data.user.role !== 'staff') {
       window.location.href = '/index.html';
+      return;
     }
-  })();
-
-  // Set dates and auto-run reports on load
-  document.addEventListener("DOMContentLoaded", async function () {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split('T')[0];
     const firstOfMonth = new Date();
     firstOfMonth.setDate(1);
-    document.getElementById("startDate").value = firstOfMonth.toISOString().split("T")[0];
-    document.getElementById("endDate").value   = today;
+    document.getElementById('startDate').value = firstOfMonth.toISOString().split('T')[0];
+    document.getElementById('endDate').value   = today;
     await loadAllReports();
-  });
+  })();
 
   function doLogout() {
     fetch('/api/auth/logout', { method: 'POST' })
