@@ -1,7 +1,10 @@
-const bcrypt     = require("bcryptjs");
-const User       = require("../models/userModel.cjs");
-const Customer   = require("../models/customerModel.cjs");
-const Instructor = require("../models/instructorModel.cjs");
+const bcrypt      = require("bcryptjs");
+const crypto      = require("crypto");
+const User        = require("../models/userModel.cjs");
+const Customer    = require("../models/customerModel.cjs");
+const Instructor  = require("../models/instructorModel.cjs");
+const ResetToken  = require("../models/resetTokenModel.cjs");
+const email       = require("../utils/emailService.cjs");
 
 // POST /api/auth/login
 const login = async (req, res) => {
@@ -72,12 +75,12 @@ const login = async (req, res) => {
 // POST /api/auth/register
 const register = async (req, res) => {
   const {
-    firstName, lastName, email, phone, address, password,
+    firstName, lastName, email: emailAddr, phone, address, password,
     emergencyContact, referral, mailingList, isUnder18, senior,
     waiverSigned, waiverSignature, waiverDate, guardianSignature,
   } = req.body;
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !emailAddr || !password) {
     return res.status(400).json({ error: "All fields are required." });
   }
   if (password.length < 6) {
@@ -85,15 +88,15 @@ const register = async (req, res) => {
   }
 
   try {
-    const username = email.trim().toLowerCase();
+    const username = emailAddr.trim().toLowerCase();
     const existing = await User.findOne({ username });
     if (existing) {
       return res.status(400).json({ error: "An account with this email already exists." });
     }
 
     // Get next customer ID
-    const customers  = await Customer.find({});
-    let maxNumber    = 0;
+    const customers = await Customer.find({});
+    let maxNumber   = 0;
     customers.forEach((c) => {
       const match = c.customerId.match(/\d+$/);
       if (match) {
@@ -103,7 +106,7 @@ const register = async (req, res) => {
     });
     const customerId = `Y${String(maxNumber + 1).padStart(3, "0")}`;
 
-    // Create customer record with all registration fields
+    // Create customer record
     const newCustomer = new Customer({
       customerId,
       firstName:        firstName.trim(),
@@ -133,11 +136,103 @@ const register = async (req, res) => {
     });
     await newUser.save();
 
+    // Send welcome email (non-blocking)
+    email.sendWelcomeEmail({
+      firstName, lastName,
+      email:      username,
+      customerId,
+    }).catch(err => console.error("Welcome email failed:", err.message));
+
     return res.json({ success: true, customerId });
 
   } catch (err) {
     console.error("Register error:", err.message);
     return res.status(500).json({ error: "Registration failed. Please try again." });
+  }
+};
+
+// POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  const { email: emailAddr } = req.body;
+  if (!emailAddr) return res.status(400).json({ error: "Email is required." });
+
+  try {
+    const username = emailAddr.trim().toLowerCase();
+    const user     = await User.findOne({ username });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+    }
+
+    // Get customer name
+    const customer = await Customer.findOne({ customerId: user.customerId });
+    const firstName = customer ? customer.firstName : "Member";
+
+    // Generate token
+    const token     = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    // Delete any existing tokens for this email
+    await ResetToken.deleteMany({ email: username });
+
+    // Save new token
+    await new ResetToken({ email: username, token, expiresAt }).save();
+
+    // Build reset URL
+    const baseUrl  = process.env.APP_URL || "https://yogitrack-client-94e5a811253b.herokuapp.com";
+    const resetUrl = `${baseUrl}/reset-password.html?token=${token}`;
+
+    // Send email
+    await email.sendPasswordResetEmail({ firstName, email: username, resetUrl });
+
+    return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+
+  } catch (err) {
+    console.error("Forgot password error:", err.message);
+    return res.status(500).json({ error: "Server error. Please try again." });
+  }
+};
+
+// POST /api/auth/reset-password
+const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({ error: "Token and password are required." });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters." });
+  }
+
+  try {
+    const resetToken = await ResetToken.findOne({ token });
+
+    if (!resetToken) {
+      return res.status(400).json({ error: "Invalid or expired reset link." });
+    }
+    if (new Date() > resetToken.expiresAt) {
+      await ResetToken.deleteOne({ token });
+      return res.status(400).json({ error: "This reset link has expired. Please request a new one." });
+    }
+
+    const user = await User.findOne({ username: resetToken.email });
+    if (!user) {
+      return res.status(404).json({ error: "Account not found." });
+    }
+
+    // Update password
+    user.password = password;
+    await user.save();
+
+    // Delete used token
+    await ResetToken.deleteOne({ token });
+
+    return res.json({ success: true, message: "Password updated successfully." });
+
+  } catch (err) {
+    console.error("Reset password error:", err.message);
+    return res.status(500).json({ error: "Server error. Please try again." });
   }
 };
 
@@ -166,4 +261,4 @@ const requireLogin = (req, res, next) => {
   return res.status(401).json({ error: "Please log in." });
 };
 
-module.exports = { login, register, logout, me, requireStaff, requireLogin };
+module.exports = { login, register, forgotPassword, resetPassword, logout, me, requireStaff, requireLogin };
