@@ -42,7 +42,7 @@
       color: #9a8e84;
       margin-top: 4px;
     }
-    .balance-low { color: #b5724a; }
+    .balance-low   { color: #b5724a; }
     .balance-empty { color: #842029; }
 
     .checkin-list { list-style: none; margin: 0; padding: 0; }
@@ -57,42 +57,7 @@
     }
     .checkin-item:last-child { border-bottom: none; }
     .checkin-class { color: #3d3028; }
-    .checkin-date { color: #9a8e84; font-size: clamp(10px, 0.8vw, 12px); }
-
-    .schedule-list { list-style: none; margin: 0; padding: 0; }
-    .schedule-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(237,232,224,0.9);
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(11px, 0.9vw, 13px);
-    }
-    .schedule-item:last-child { border-bottom: none; }
-    .schedule-name { color: #3d3028; }
-    .schedule-time { color: #9a8e84; font-size: clamp(10px, 0.8vw, 12px); }
-    .schedule-type {
-      font-size: 9px;
-      padding: 2px 7px;
-      border-radius: 10px;
-      background: #e4ede0;
-      color: #3d6b2e;
-      font-family: 'Lato', sans-serif;
-      letter-spacing: 0.06em;
-    }
-
-    .profile-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(237,232,224,0.9);
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(11px, 0.9vw, 13px);
-    }
-    .profile-row:last-child { border-bottom: none; }
-    .profile-label { color: #9a8e84; }
-    .profile-value { color: #3d3028; }
+    .checkin-date  { color: #9a8e84; font-size: clamp(10px, 0.8vw, 12px); }
 
     .empty-msg {
       font-family: 'Lato', sans-serif;
@@ -110,6 +75,81 @@
       font-weight: 300;
       margin-bottom: 20px;
     }
+
+    /* ── Schedule day-by-day ── */
+    .schedule-page { width: 100%; }
+    .day-block { margin-bottom: 24px; }
+    .day-heading {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(10px, 0.85vw, 12px);
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #3d3028;
+      padding-bottom: 8px;
+      border-bottom: 1.5px solid #3d3028;
+      margin-bottom: 0;
+    }
+    .schedule-table { width: 100%; border-collapse: collapse; }
+    .schedule-table th {
+      font-family: 'Lato', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9a8e84;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(194,185,167,0.3);
+      background: transparent;
+      font-weight: 500;
+    }
+    .schedule-table td {
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(12px, 1vw, 14px);
+      color: #3d3028;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(237,232,224,0.8);
+      vertical-align: middle;
+      background: transparent;
+    }
+    .schedule-table tr:last-child td { border-bottom: none; }
+    .schedule-table tr:hover td { background: rgba(237,232,224,0.4); }
+    .class-type-tag {
+      display: inline-block;
+      font-size: 9px;
+      padding: 1px 7px;
+      border-radius: 8px;
+      background: #e4ede0;
+      color: #3d6b2e;
+      font-family: 'Lato', sans-serif;
+      letter-spacing: 0.06em;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .no-classes {
+      font-family: 'Lato', sans-serif;
+      font-size: 12px;
+      color: #c2b9a7;
+      font-style: italic;
+      padding: 10px 0;
+    }
+
+    /* Profile */
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(237,232,224,0.9);
+      font-family: 'Lato', sans-serif;
+      font-size: clamp(11px, 0.9vw, 13px);
+    }
+    .profile-row:last-child { border-bottom: none; }
+    .profile-label { color: #9a8e84; }
+    .profile-value { color: #3d3028; }
+
+    @media (max-width: 520px) {
+      .portal-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -123,13 +163,14 @@
     <div class="center-col">
       <nav class="topnav">
         <div class="nav-links">
-          <a href="customer-portal.html" class="active">Dashboard</a>
+          <a href="#" onclick="showSection('dashboard')" class="active">Dashboard</a>
           <a href="#" onclick="showSection('schedule')">Schedule</a>
           <a href="#" onclick="showSection('profile')">My Profile</a>
         </div>
-        <a href="../index.html" class="nav-logout" onclick="doLogout()">Log out</a>
+        <a href="#" class="nav-logout" onclick="doLogout()">Log out</a>
       </nav>
 
+      <!-- Dashboard -->
       <div class="content-panel" id="dashboardSection">
         <div class="welcome-name" id="welcomeName">Welcome back</div>
 
@@ -149,12 +190,12 @@
             </ul>
           </div>
 
-          <!-- Upcoming Schedule -->
+          <!-- Upcoming Schedule preview -->
           <div class="portal-card" style="grid-column: 1 / -1;">
-            <h3>Upcoming Classes</h3>
-            <ul class="schedule-list" id="scheduleList">
-              <li class="empty-msg">Loading...</li>
-            </ul>
+            <h3>Class Schedule</h3>
+            <div class="schedule-page" id="dashSchedule">
+              <p class="empty-msg">Loading...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -190,9 +231,9 @@
       <div class="content-panel" id="scheduleSection" style="display:none;">
         <div class="card card--wide">
           <h2>Class Schedule</h2>
-          <ul class="schedule-list" id="fullScheduleList">
-            <li class="empty-msg">Loading...</li>
-          </ul>
+          <div class="schedule-page" id="fullSchedule">
+            <p class="empty-msg">Loading...</p>
+          </div>
         </div>
       </div>
 
@@ -200,7 +241,11 @@
   </div>
 
   <script>
-    let currentCustomer = null;
+    const DAYS_ORDER = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const DAY_FULL   = { Sun:"Sunday", Mon:"Monday", Tue:"Tuesday", Wed:"Wednesday", Thu:"Thursday", Fri:"Friday", Sat:"Saturday" };
+
+    let currentCustomer  = null;
+    let scheduleBuilt    = false;
 
     async function init() {
       try {
@@ -211,23 +256,24 @@
           return;
         }
 
-        const custRes  = await fetch(`/api/portal/me`);
+        const custRes   = await fetch('/api/portal/me');
         currentCustomer = await custRes.json();
 
-        // Welcome name
         document.getElementById('welcomeName').textContent = `Welcome back, ${currentCustomer.firstName} ☀︎`;
 
-        // Balance
         const bal   = currentCustomer.classBalance || 0;
         const balEl = document.getElementById('balanceNumber');
         const lblEl = document.getElementById('balanceLabel');
         balEl.textContent = bal;
-        if (bal === 0) { balEl.classList.add('balance-empty'); lblEl.textContent = 'no classes remaining'; }
-        else if (bal <= 2) { balEl.classList.add('balance-low'); lblEl.textContent = 'classes remaining — renew soon'; }
+        if (bal <= 0) {
+          balEl.classList.add('balance-empty');
+          lblEl.textContent = bal < 0 ? `balance — please see front desk` : 'no classes remaining';
+        } else if (bal <= 2) {
+          balEl.classList.add('balance-low');
+          lblEl.textContent = 'classes remaining — renew soon';
+        }
 
-        // Load checkins
         loadCheckins();
-        // Load schedule
         loadSchedule();
 
       } catch (err) {
@@ -241,15 +287,10 @@
         const res      = await fetch('/api/portal/checkins');
         const checkins = await res.json();
         const list     = document.getElementById('checkinList');
-
-        if (!checkins.length) {
-          list.innerHTML = '<li class="empty-msg">No check-ins yet.</li>';
-          return;
-        }
-
+        if (!checkins.length) { list.innerHTML = '<li class="empty-msg">No check-ins yet.</li>'; return; }
         list.innerHTML = checkins.slice(0, 5).map(c => {
-          const dt = new Date(c.checkinDatetime);
-          const formatted = dt.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+          const dt        = new Date(c.checkinDatetime);
+          const formatted = dt.toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' });
           return `<li class="checkin-item">
             <span class="checkin-class">${c.classId}</span>
             <span class="checkin-date">${formatted}</span>
@@ -262,36 +303,93 @@
 
     async function loadSchedule() {
       try {
-        const res     = await fetch('/api/schedule/getClassIds');
-        const classes = await res.json();
-        const list    = document.getElementById('scheduleList');
-        const fullList = document.getElementById('fullScheduleList');
-
-        if (!classes.length) {
-          list.innerHTML = '<li class="empty-msg">No classes scheduled.</li>';
-          fullList.innerHTML = '<li class="empty-msg">No classes scheduled.</li>';
+        // Get all active classes
+        const idsRes  = await fetch('/api/schedule/getClassIds');
+        const ids     = await idsRes.json();
+        if (!ids.length) {
+          document.getElementById('dashSchedule').innerHTML  = '<p class="empty-msg">No classes scheduled.</p>';
+          document.getElementById('fullSchedule').innerHTML  = '<p class="empty-msg">No classes scheduled.</p>';
           return;
         }
 
-        const html = classes.slice(0, 4).map(c =>
-          `<li class="schedule-item">
-            <span class="schedule-name">${c.className}</span>
-            <span class="schedule-type">${c.classType || 'General'}</span>
-          </li>`
-        ).join('');
+        // Fetch full class details
+        const details = await Promise.all(
+          ids.map(c => fetch(`/api/schedule/getClass?classId=${c.classId}`).then(r => r.json()))
+        );
 
-        const fullHtml = classes.map(c =>
-          `<li class="schedule-item">
-            <span class="schedule-name">${c.className}</span>
-            <span class="schedule-type">${c.classType || 'General'}</span>
-          </li>`
-        ).join('');
+        // Fetch instructor names
+        const instrRes     = await fetch('/api/customer/getInstructors');
+        const instrIds     = await instrRes.json();
+        const instrDetails = await Promise.all(
+          instrIds.map(i => fetch(`/api/customer/getCustomer?customerId=${i.customerId}`).then(r => r.json()))
+        );
 
-        list.innerHTML     = html;
-        fullList.innerHTML = fullHtml;
+        // Group by day
+        const byDay = {};
+        DAYS_ORDER.forEach(d => byDay[d] = []);
+        details.forEach(cls => {
+          (cls.daytime || []).forEach(dt => {
+            if (byDay[dt.day] !== undefined) byDay[dt.day].push({ ...cls, _slot: dt });
+          });
+        });
+        DAYS_ORDER.forEach(d => byDay[d].sort((a,b) => a._slot.time.localeCompare(b._slot.time)));
+
+        const html = buildScheduleHTML(byDay, instrDetails);
+        document.getElementById('dashSchedule').innerHTML = html;
+        document.getElementById('fullSchedule').innerHTML = html;
+        scheduleBuilt = true;
+
       } catch (err) {
         console.error('Failed to load schedule:', err);
       }
+    }
+
+    function buildScheduleHTML(byDay, instrDetails) {
+      let html = '';
+      DAYS_ORDER.forEach(day => {
+        html += `<div class="day-block">
+          <div class="day-heading">${DAY_FULL[day]}</div>`;
+
+        if (!byDay[day].length) {
+          html += `<div class="no-classes">No classes scheduled</div>`;
+        } else {
+          html += `<table class="schedule-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Class</th>
+                <th>Instructor</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+          byDay[day].forEach(cls => {
+            const slot      = cls._slot;
+            const instr     = instrDetails.find(i => i.customerId === cls.instructorId);
+            const instrName = instr ? `${instr.firstName} ${instr.lastName}` : '—';
+            const [h, m]    = slot.time.split(':');
+            const startMin  = parseInt(h)*60 + parseInt(m);
+            const endMin    = slot.duration ? startMin + parseInt(slot.duration) : null;
+            function fmt(t) {
+              const hh = Math.floor(t/60)%24, mm = t%60;
+              return `${hh%12||12}:${String(mm).padStart(2,'0')} ${hh>=12?'PM':'AM'}`;
+            }
+            const timeStr = endMin ? `${fmt(startMin)} – ${fmt(endMin)}` : fmt(startMin);
+            const typeTag = cls.classType && cls.classType !== 'General'
+              ? `<span class="class-type-tag">${cls.classType}</span>` : '';
+
+            html += `<tr>
+              <td style="white-space:nowrap;">${timeStr}</td>
+              <td>${cls.className}${typeTag}</td>
+              <td>${instrName}</td>
+            </tr>`;
+          });
+
+          html += `</tbody></table>`;
+        }
+        html += `</div>`;
+      });
+      return html;
     }
 
     async function saveProfile() {
@@ -305,9 +403,8 @@
           preferredContact: pref ? pref.value : 'email',
         };
         const res = await fetch('/api/portal/update', {
-          method:  'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(body),
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error('Update failed');
         alert('✅ Profile updated!');
@@ -335,9 +432,7 @@
         document.getElementById('profileAddress').value   = currentCustomer.address   || '';
         document.getElementById('profileEmail').value     = currentCustomer.email     || '';
         const pref = currentCustomer.preferredContact;
-        document.querySelectorAll('input[name="profilePref"]').forEach(r => {
-          r.checked = r.value === pref;
-        });
+        document.querySelectorAll('input[name="profilePref"]').forEach(r => { r.checked = r.value === pref; });
       }
     }
 
