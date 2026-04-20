@@ -1,5 +1,6 @@
 let formMode    = "search";
 let allPackages = [];
+let customerChoices = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   setFormForSearch();
@@ -112,7 +113,7 @@ document.getElementById("saveBtn")?.addEventListener("click", async () => {
 document.getElementById("deleteBtn")?.addEventListener("click", async () => {
   const customerId = document.getElementById("customerIdSelect").value;
   if (!customerId) { alert("Please select a customer to delete."); return; }
-  if (!confirm(`Delete customer ${customerId}?`)) return;
+  if (!confirm(`Permanently delete customer ${customerId}? This cannot be undone.`)) return;
 
   try {
     const res = await fetch(`/api/customer/deleteCustomer?customerId=${customerId}`, { method: "DELETE" });
@@ -125,37 +126,66 @@ document.getElementById("deleteBtn")?.addEventListener("click", async () => {
   }
 });
 
+document.getElementById("deactivateBtn")?.addEventListener("click", async () => {
+  const customerId = document.getElementById("customerIdSelect").value;
+  if (!customerId) { alert("Please select a customer."); return; }
+  const name = `${document.getElementById("firstName").value} ${document.getElementById("lastName").value}`;
+  if (!confirm(`Deactivate ${name}? They will no longer appear in dropdowns but their data will be preserved.`)) return;
+
+  try {
+    const res = await fetch(`/api/customer/deactivate?customerId=${customerId}`, { method: "PUT" });
+    if (!res.ok) throw new Error("Deactivate failed");
+    alert(`✅ ${name} has been deactivated.`);
+    clearCustomerForm();
+    initCustomerDropdown();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
+document.getElementById("reactivateBtn")?.addEventListener("click", async () => {
+  const customerId = document.getElementById("customerIdSelect").value;
+  if (!customerId) { alert("Please select a customer."); return; }
+  const name = `${document.getElementById("firstName").value} ${document.getElementById("lastName").value}`;
+  if (!confirm(`Reactivate ${name}?`)) return;
+
+  try {
+    const res = await fetch(`/api/customer/reactivate?customerId=${customerId}`, { method: "PUT" });
+    if (!res.ok) throw new Error("Reactivate failed");
+    alert(`✅ ${name} has been reactivated.`);
+    clearCustomerForm();
+    initCustomerDropdown();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
 async function initCustomerDropdown() {
   try {
-    const res       = await fetch("/api/customer/getCustomerIds");
+    // Use getAllCustomerIds to show active + inactive in admin dropdown
+    const res       = await fetch("/api/customer/getAllCustomerIds");
     const customers = await res.json();
 
-    // Destroy existing Choices instance if it exists
-    if (customerChoices) {
-      customerChoices.destroy();
-      customerChoices = null;
-    }
+    if (customerChoices) { customerChoices.destroy(); customerChoices = null; }
 
     const select = document.getElementById("customerIdSelect");
     select.innerHTML = '<option value="">-- Select Customer --</option>';
     customers.forEach((c) => {
       const option = document.createElement("option");
       option.value = c.customerId;
-      option.textContent = `${c.firstName} ${c.lastName} (${c.customerId})`;
+      option.textContent = `${c.firstName} ${c.lastName} (${c.customerId})${c.active === false ? ' — Inactive' : ''}`;
       select.appendChild(option);
     });
 
-    // Init Choices.js
     customerChoices = new Choices(select, {
-      searchEnabled:       true,
+      searchEnabled:          true,
       searchPlaceholderValue: "Type to search…",
-      itemSelectText:      "",
-      shouldSort:          false,
-      placeholder:         true,
-      placeholderValue:    "-- Select Customer --",
+      itemSelectText:         "",
+      shouldSort:             false,
+      placeholder:            true,
+      placeholderValue:       "-- Select Customer --",
     });
 
-    // Listen for selection
     select.addEventListener("change", handleCustomerChange);
 
   } catch (err) {
@@ -167,6 +197,9 @@ async function handleCustomerChange() {
   const customerId = document.getElementById("customerIdSelect").value;
   if (!customerId) {
     document.getElementById("packageSaleSection").style.display = "none";
+    document.getElementById("inactiveBadge").style.display = "none";
+    document.getElementById("deactivateBtn").style.display = "none";
+    document.getElementById("reactivateBtn").style.display = "none";
     return;
   }
 
@@ -202,11 +235,22 @@ async function handleCustomerChange() {
         document.getElementById("portalRole").value = "customer";
     }
 
-    document.getElementById("packageSaleSection").style.display = "block";
-    document.getElementById("saleCustomerName").textContent =
-      `Selling to: ${data.firstName} ${data.lastName} — Current balance: ${data.classBalance || 0} classes`;
-    clearSaleForm();
-    loadSaleHistory(customerId);
+    // Show inactive badge and toggle deactivate/reactivate buttons
+    const isActive = data.active !== false;
+    document.getElementById("inactiveBadge").style.display  = isActive ? "none" : "inline-block";
+    document.getElementById("deactivateBtn").style.display  = isActive ? "inline-flex" : "none";
+    document.getElementById("reactivateBtn").style.display  = isActive ? "none" : "inline-flex";
+
+    // Only show package sale for active customers
+    if (isActive) {
+      document.getElementById("packageSaleSection").style.display = "block";
+      document.getElementById("saleCustomerName").textContent =
+        `Selling to: ${data.firstName} ${data.lastName} — Current balance: ${data.classBalance || 0} classes`;
+      clearSaleForm();
+      loadSaleHistory(customerId);
+    } else {
+      document.getElementById("packageSaleSection").style.display = "none";
+    }
 
   } catch (err) {
     alert(`Error loading customer: ${err.message}`);
@@ -258,10 +302,7 @@ async function sellPackage() {
       body:    JSON.stringify({ customerId, packageId, classesAdded: classesCount, amountPaid, paymentMethod }),
     });
     const data = await res.json();
-    if (!res.ok || !data.success) {
-      showSaleFeedback(data.error || "Sale failed.", false);
-      return;
-    }
+    if (!res.ok || !data.success) { showSaleFeedback(data.error || "Sale failed.", false); return; }
     showSaleFeedback(`✅ Sale recorded! New balance: ${data.newBalance} classes.`, true);
     document.getElementById("classBalance").value = data.newBalance;
     document.getElementById("saleCustomerName").textContent =
@@ -294,13 +335,7 @@ async function loadSaleHistory(customerId) {
     sales.forEach(s => {
       const dt = new Date(s.saleDate).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${dt}</td>
-        <td>${s.packageName}</td>
-        <td>${s.classesAdded}</td>
-        <td>$${parseFloat(s.amountPaid).toFixed(2)}</td>
-        <td>${s.paymentMethod}</td>
-      `;
+      tr.innerHTML = `<td>${dt}</td><td>${s.packageName}</td><td>${s.classesAdded}</td><td>$${parseFloat(s.amountPaid).toFixed(2)}</td><td>${s.paymentMethod}</td>`;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -319,15 +354,15 @@ function clearSaleForm() {
 
 function clearCustomerForm() {
   document.getElementById("customerForm").reset();
-  if (customerChoices) {
-    customerChoices.destroy();
-    customerChoices = null;
-  }
+  if (customerChoices) { customerChoices.destroy(); customerChoices = null; }
   const select = document.getElementById("customerIdSelect");
   select.innerHTML = '<option value="">-- Select Customer --</option>';
   if (document.getElementById("portalRole"))
     document.getElementById("portalRole").value = "customer";
   document.getElementById("packageSaleSection").style.display = "none";
+  document.getElementById("inactiveBadge").style.display      = "none";
+  document.getElementById("deactivateBtn").style.display      = "none";
+  document.getElementById("reactivateBtn").style.display      = "none";
   initCustomerDropdown();
 }
 
@@ -355,4 +390,7 @@ function setFormForAdd() {
   if (document.getElementById("portalRole"))
     document.getElementById("portalRole").value = "customer";
   document.getElementById("packageSaleSection").style.display = "none";
+  document.getElementById("inactiveBadge").style.display      = "none";
+  document.getElementById("deactivateBtn").style.display      = "none";
+  document.getElementById("reactivateBtn").style.display      = "none";
 }

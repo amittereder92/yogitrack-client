@@ -5,65 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Customers</title>
   <link rel="stylesheet" href="../css/style.css">
-  <!-- Choices.js for searchable dropdown -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.css">
   <style>
-    /* Override Choices.js to match YogiTrack style */
-    .choices__inner {
-      background: #faf8f5;
-      border: 1px solid #c2b9a7;
-      border-radius: 4px;
-      padding: 0.4rem 0.6rem;
-      font-family: 'Lato', sans-serif;
-      font-size: clamp(13px, 1vw, 15px);
-      font-weight: 300;
-      color: #3d3028;
-      min-height: unset;
-    }
-    .choices__inner:focus-within {
-      border-color: #7a8c6e;
-      box-shadow: 0 0 0 3px rgba(122,140,110,0.12);
-    }
-    .choices__list--dropdown {
-      border: 1px solid #c2b9a7;
-      border-radius: 4px;
-      background: #faf8f5;
-      font-family: 'Lato', sans-serif;
-      z-index: 100;
-    }
-    .choices__list--dropdown .choices__item--selectable {
-      font-size: 13px;
-      color: #3d3028;
-      padding: 8px 12px;
-    }
-    .choices__list--dropdown .choices__item--selectable.is-highlighted {
-      background: #ede8e0;
-      color: #3d3028;
-    }
-    .choices__input {
-      font-family: 'Lato', sans-serif;
-      font-size: 13px;
-      background: #faf8f5;
-      color: #3d3028;
-    }
-    .choices[data-type*=select-one] .choices__inner { padding-right: 2rem; }
-    .choices__placeholder { color: #9a8e84; }
-    .choices__list--single { padding: 0; }
-    .choices__list--single .choices__item { font-size: 13px; color: #3d3028; }
+    .choices__inner { background:#faf8f5; border:1px solid #c2b9a7; border-radius:4px; padding:0.4rem 0.6rem; font-family:'Lato',sans-serif; font-size:clamp(13px,1vw,15px); font-weight:300; color:#3d3028; min-height:unset; }
+    .choices__inner:focus-within { border-color:#7a8c6e; box-shadow:0 0 0 3px rgba(122,140,110,0.12); }
+    .choices__list--dropdown { border:1px solid #c2b9a7; border-radius:4px; background:#faf8f5; font-family:'Lato',sans-serif; z-index:100; }
+    .choices__list--dropdown .choices__item--selectable { font-size:13px; color:#3d3028; padding:8px 12px; }
+    .choices__list--dropdown .choices__item--selectable.is-highlighted { background:#ede8e0; color:#3d3028; }
+    .choices__input { font-family:'Lato',sans-serif; font-size:13px; background:#faf8f5; color:#3d3028; }
+    .choices[data-type*=select-one] .choices__inner { padding-right:2rem; }
+    .choices__placeholder { color:#9a8e84; }
+    .choices__list--single { padding:0; }
+    .choices__list--single .choices__item { font-size:13px; color:#3d3028; }
+    .inactive-badge { display:inline-block; background:#f5ece4; color:#8f5535; font-family:'Lato',sans-serif; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:3px 8px; border-radius:4px; margin-left:8px; vertical-align:middle; }
   </style>
 </head>
 <body>
-
   <div class="page-shell">
-
     <a class="wing-brand" href="dashboard.html">
       <img src="../images/Logo.png" alt="YogiTrack Logo">
       <span class="wing-brand-name">YogiTrack</span>
       <span class="wing-brand-tagline">Studio Manager</span>
     </a>
-
     <div class="center-col">
-
       <nav class="topnav">
         <div class="nav-links">
           <a href="dashboard.html">Dashboard</a>
@@ -78,10 +42,8 @@
       </nav>
 
       <div class="content-panel">
-
-        <!-- Customer Details Form -->
         <form class="card card--wide" id="customerForm">
-          <h2>Customer Details</h2>
+          <h2>Customer Details <span id="inactiveBadge" class="inactive-badge" style="display:none;">Inactive</span></h2>
 
           <label id="customerIdLabel">Customer ID
             <select name="customerId" id="customerIdSelect" class="form-input">
@@ -138,6 +100,8 @@
             <button type="button" class="btn btn--primary" id="addBtn">Add New</button>
             <button type="button" class="btn" id="saveBtn">Save</button>
             <button type="button" class="btn btn--danger" id="deleteBtn">Delete</button>
+            <button type="button" class="btn" id="deactivateBtn" style="display:none; background:#b5724a; color:#faf8f5; border-color:#b5724a;">Deactivate</button>
+            <button type="button" class="btn" id="reactivateBtn" style="display:none; background:#7a8c6e; color:#faf8f5; border-color:#7a8c6e;">Reactivate</button>
             <button type="button" class="btn" onclick="clearCustomerForm()">Clear</button>
             <a href="dashboard.html" class="btn">Exit</a>
           </div>
@@ -190,20 +154,13 @@
             <h3 style="font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0 0 0.75rem;">Purchase History</h3>
             <table>
               <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Package</th>
-                  <th>Classes</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                </tr>
+                <tr><th>Date</th><th>Package</th><th>Classes</th><th>Amount</th><th>Method</th></tr>
               </thead>
               <tbody id="saleHistoryBody"></tbody>
             </table>
             <div id="saleHistoryEmpty" style="font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:8px 0; display:none;">No purchases yet.</div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -211,7 +168,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.js"></script>
   <script>
     let currentUserRole = 'staff';
-    let customerChoices = null;
 
     (async function() {
       const res  = await fetch('/api/auth/me');

@@ -8,20 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("addDaytimeBtn").addEventListener("click", addDaytimeRow);
 });
 
-// SEARCH
 document.getElementById("searchBtn").addEventListener("click", () => {
   clearScheduleForm();
   setFormForSearch();
   initClassDropdown();
 });
 
-// ADD
 document.getElementById("addBtn").addEventListener("click", () => {
   setFormForAdd();
   addDaytimeRow();
 });
 
-// SAVE
 document.getElementById("saveBtn").addEventListener("click", async () => {
   const form    = document.getElementById("scheduleForm");
   const daytime = collectDaytimeRows();
@@ -83,11 +80,10 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
   }
 });
 
-// DELETE
 document.getElementById("deleteBtn").addEventListener("click", async () => {
   const classId = document.getElementById("classIdSelect").value;
   if (!classId) { alert("Please select a class to delete."); return; }
-  if (!confirm(`Delete class ${classId}? This cannot be undone.`)) return;
+  if (!confirm(`Permanently delete class ${classId}? This cannot be undone.`)) return;
 
   try {
     const res = await fetch(`/api/schedule/deleteClass?classId=${classId}`, { method: "DELETE" });
@@ -101,7 +97,42 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
   }
 });
 
-// GENERATE QR
+document.getElementById("deactivateBtn").addEventListener("click", async () => {
+  const classId = document.getElementById("classIdSelect").value;
+  if (!classId) { alert("Please select a class."); return; }
+  const name = document.getElementById("className").value;
+  if (!confirm(`Deactivate "${name}"? It will no longer appear on the schedule or customer portal.`)) return;
+
+  try {
+    const res = await fetch(`/api/schedule/deactivate?classId=${classId}`, { method: "PUT" });
+    if (!res.ok) throw new Error("Deactivate failed");
+    alert(`✅ "${name}" has been deactivated.`);
+    clearScheduleForm();
+    setFormForSearch();
+    initClassDropdown();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
+document.getElementById("reactivateBtn").addEventListener("click", async () => {
+  const classId = document.getElementById("classIdSelect").value;
+  if (!classId) { alert("Please select a class."); return; }
+  const name = document.getElementById("className").value;
+  if (!confirm(`Reactivate "${name}"?`)) return;
+
+  try {
+    const res = await fetch(`/api/schedule/reactivate?classId=${classId}`, { method: "PUT" });
+    if (!res.ok) throw new Error("Reactivate failed");
+    alert(`✅ "${name}" has been reactivated.`);
+    clearScheduleForm();
+    setFormForSearch();
+    initClassDropdown();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+});
+
 document.getElementById("generateQrBtn").addEventListener("click", async () => {
   const classId = document.getElementById("classIdSelect").value ||
                   document.getElementById("classIdText").value;
@@ -130,54 +161,36 @@ function showQrModal(qrDataUrl, className, validUntil) {
   if (existing) existing.remove();
 
   const until = new Date(validUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
   const modal = document.createElement("div");
   modal.id = "qrModal";
-  modal.style.cssText = `
-    position: fixed; inset: 0; z-index: 1000;
-    background: rgba(61,48,40,0.7);
-    display: flex; align-items: center; justify-content: center;
-  `;
+  modal.style.cssText = `position:fixed;inset:0;z-index:1000;background:rgba(61,48,40,0.7);display:flex;align-items:center;justify-content:center;`;
   modal.innerHTML = `
-    <div style="
-      background: #f7f3ee; border-radius: 10px; padding: 2.5rem;
-      text-align: center; max-width: 380px; width: 90%;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-    ">
-      <h2 style="font-family:'Fraunces',serif; font-weight:300; color:#3d3028; margin:0 0 0.25rem;">${className}</h2>
-      <p style="font-family:'Lato',sans-serif; font-size:12px; color:#9a8e84; margin:0 0 1.5rem; letter-spacing:0.08em; text-transform:uppercase;">Valid until ${until}</p>
-      <img src="${qrDataUrl}" alt="QR Code" style="width:220px; height:220px; display:block; margin:0 auto 1.5rem;">
-      <p style="font-family:'Lato',sans-serif; font-size:11px; color:#9a8e84; margin:0 0 1.5rem;">Customers scan this code to check in</p>
-      <div style="display:flex; gap:10px; justify-content:center;">
-        <button onclick="window.print()" style="
-          padding:.55rem 1.25rem; border-radius:4px; border:1px solid #c2b9a7;
-          background:#ede8e0; color:#3d3028; font-family:'Lato',sans-serif;
-          font-size:11px; letter-spacing:0.09em; text-transform:uppercase; cursor:pointer;
-        ">Print</button>
-        <button onclick="document.getElementById('qrModal').remove()" style="
-          padding:.55rem 1.25rem; border-radius:4px; border:none;
-          background:#7a8c6e; color:#faf8f5; font-family:'Lato',sans-serif;
-          font-size:11px; letter-spacing:0.09em; text-transform:uppercase; cursor:pointer;
-        ">Close</button>
+    <div style="background:#f7f3ee;border-radius:10px;padding:2.5rem;text-align:center;max-width:380px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.3);">
+      <h2 style="font-family:'Fraunces',serif;font-weight:300;color:#3d3028;margin:0 0 0.25rem;">${className}</h2>
+      <p style="font-family:'Lato',sans-serif;font-size:12px;color:#9a8e84;margin:0 0 1.5rem;letter-spacing:0.08em;text-transform:uppercase;">Valid until ${until}</p>
+      <img src="${qrDataUrl}" alt="QR Code" style="width:220px;height:220px;display:block;margin:0 auto 1.5rem;">
+      <p style="font-family:'Lato',sans-serif;font-size:11px;color:#9a8e84;margin:0 0 1.5rem;">Customers scan this code to check in</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="window.print()" style="padding:.55rem 1.25rem;border-radius:4px;border:1px solid #c2b9a7;background:#ede8e0;color:#3d3028;font-family:'Lato',sans-serif;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;cursor:pointer;">Print</button>
+        <button onclick="document.getElementById('qrModal').remove()" style="padding:.55rem 1.25rem;border-radius:4px;border:none;background:#7a8c6e;color:#faf8f5;font-family:'Lato',sans-serif;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;cursor:pointer;">Close</button>
       </div>
     </div>
   `;
   document.body.appendChild(modal);
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) modal.remove();
-  });
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
 }
 
 async function initClassDropdown() {
   const select = document.getElementById("classIdSelect");
   select.innerHTML = '<option value=""> -- Select Class -- </option>';
   try {
-    const res     = await fetch("/api/schedule/getClassIds");
+    // Use getAllClassIds to show active + inactive in admin
+    const res     = await fetch("/api/schedule/getAllClassIds");
     const classes = await res.json();
     classes.forEach((c) => {
       const option = document.createElement("option");
       option.value = c.classId;
-      option.textContent = `${c.classId}: ${c.className}`;
+      option.textContent = `${c.classId}: ${c.className}${c.active === false ? ' — Inactive' : ''}`;
       select.appendChild(option);
     });
   } catch (err) {
@@ -185,7 +198,6 @@ async function initClassDropdown() {
   }
 }
 
-// FIXED: now uses customer-based instructor list
 async function initInstructorDropdown() {
   const select = document.getElementById("instructorId");
   try {
@@ -208,7 +220,12 @@ async function addClassDropdownListener() {
 
   select.addEventListener("change", async () => {
     const classId = select.value;
-    if (!classId) return;
+    if (!classId) {
+      document.getElementById("inactiveBadge").style.display  = "none";
+      document.getElementById("deactivateBtn").style.display  = "none";
+      document.getElementById("reactivateBtn").style.display  = "none";
+      return;
+    }
 
     try {
       const res  = await fetch(`/api/schedule/getClass?classId=${classId}`);
@@ -226,6 +243,13 @@ async function addClassDropdownListener() {
 
       formMode = "edit";
       document.getElementById("classIdText").value = classId;
+
+      // Show inactive badge and toggle buttons
+      const isActive = data.active !== false;
+      document.getElementById("inactiveBadge").style.display  = isActive ? "none" : "inline-block";
+      document.getElementById("deactivateBtn").style.display  = isActive ? "inline-flex" : "none";
+      document.getElementById("reactivateBtn").style.display  = isActive ? "none" : "inline-flex";
+
     } catch (err) {
       alert(`Error loading class: ${err.message}`);
     }
@@ -239,18 +263,18 @@ function addDaytimeRow(dt = {}) {
   row.className = "daytime-row grid-2";
   row.style.marginBottom = "0.5rem";
   row.innerHTML = `
-    <label style="text-transform:none; font-size:.9rem; font-weight:400;">Day
+    <label style="text-transform:none;font-size:.9rem;font-weight:400;">Day
       <select class="dt-day form-input styled-select">
         ${days.map(d => `<option value="${d}" ${dt.day === d ? "selected" : ""}>${d}</option>`).join("")}
       </select>
     </label>
-    <label style="text-transform:none; font-size:.9rem; font-weight:400;">Time
+    <label style="text-transform:none;font-size:.9rem;font-weight:400;">Time
       <input type="time" class="dt-time" value="${dt.time ? dt.time.slice(0,5) : ""}">
     </label>
-    <label style="text-transform:none; font-size:.9rem; font-weight:400;">Duration (min)
+    <label style="text-transform:none;font-size:.9rem;font-weight:400;">Duration (min)
       <input type="number" class="dt-duration" value="${dt.duration || ""}" min="1">
     </label>
-    <div style="display:flex; align-items:flex-end;">
+    <div style="display:flex;align-items:flex-end;">
       <button type="button" class="btn btn--danger" style="padding:.4rem .75rem;" onclick="this.closest('.daytime-row').remove()">Remove</button>
     </div>
   `;
@@ -271,6 +295,9 @@ function clearScheduleForm() {
   document.getElementById("classIdSelect").innerHTML = '<option value=""> -- Select Class -- </option>';
   document.getElementById("classIdText").value = "";
   document.getElementById("daytimeList").innerHTML = "";
+  document.getElementById("inactiveBadge").style.display  = "none";
+  document.getElementById("deactivateBtn").style.display  = "none";
+  document.getElementById("reactivateBtn").style.display  = "none";
 }
 
 function setFormForSearch() {
@@ -281,6 +308,9 @@ function setFormForSearch() {
   document.getElementById("classIdText").value              = "";
   document.getElementById("scheduleForm").reset();
   document.getElementById("daytimeList").innerHTML = "";
+  document.getElementById("inactiveBadge").style.display  = "none";
+  document.getElementById("deactivateBtn").style.display  = "none";
+  document.getElementById("reactivateBtn").style.display  = "none";
 }
 
 function setFormForAdd() {
@@ -292,4 +322,7 @@ function setFormForAdd() {
   document.getElementById("classIdText").value              = "Auto-generated";
   document.getElementById("scheduleForm").reset();
   document.getElementById("daytimeList").innerHTML = "";
+  document.getElementById("inactiveBadge").style.display  = "none";
+  document.getElementById("deactivateBtn").style.display  = "none";
+  document.getElementById("reactivateBtn").style.display  = "none";
 }
