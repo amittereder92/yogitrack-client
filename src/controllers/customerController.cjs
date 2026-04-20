@@ -11,9 +11,26 @@ exports.getCustomer = async (req, res) => {
   }
 };
 
+// Only returns active customers for dropdowns
 exports.getCustomerIds = async (req, res) => {
   try {
-    const customers = await Customer.find({}, { customerId: 1, firstName: 1, lastName: 1, _id: 0 }).sort({ customerId: 1 });
+    const customers = await Customer.find(
+      { active: { $ne: false } },
+      { customerId: 1, firstName: 1, lastName: 1, _id: 0 }
+    ).sort({ customerId: 1 });
+    res.json(customers);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// Returns ALL customers including inactive (for admin management page)
+exports.getAllCustomerIds = async (req, res) => {
+  try {
+    const customers = await Customer.find(
+      {},
+      { customerId: 1, firstName: 1, lastName: 1, active: 1, _id: 0 }
+    ).sort({ customerId: 1 });
     res.json(customers);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -38,13 +55,13 @@ exports.getNextId = async (req, res) => {
   }
 };
 
-// GET /api/customer/getInstructors — customers with instructor role
+// GET /api/customer/getInstructors — active customers with instructor role
 exports.getInstructors = async (req, res) => {
   try {
     const users = await User.find({ role: "instructor" }, { customerId: 1, displayName: 1, _id: 0 });
     const customerIds = users.map(u => u.customerId).filter(Boolean);
     const customers = await Customer.find(
-      { customerId: { $in: customerIds } },
+      { customerId: { $in: customerIds }, active: { $ne: false } },
       { customerId: 1, firstName: 1, lastName: 1, _id: 0 }
     ).sort({ customerId: 1 });
     res.json(customers);
@@ -73,7 +90,10 @@ exports.add = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const newCustomer = new Customer({ customerId, firstName, lastName, email, phone, address, senior, preferredContact, classBalance });
+    const newCustomer = new Customer({
+      customerId, firstName, lastName, email, phone, address,
+      senior, preferredContact, classBalance, active: true,
+    });
     await newCustomer.save();
 
     if (password && email) {
@@ -81,8 +101,7 @@ exports.add = async (req, res) => {
       const existingUser = await User.findOne({ username });
       if (!existingUser) {
         const newUser = new User({
-          username,
-          password,
+          username, password,
           role:        role || "customer",
           customerId,
           displayName: `${firstName} ${lastName}`,
@@ -109,18 +128,45 @@ exports.update = async (req, res) => {
     );
     if (!updated) return res.status(404).json({ message: "Customer not found" });
 
-    // Update role in user account if role provided
     if (role) {
-      await User.findOneAndUpdate(
-        { customerId },
-        { role },
-        { new: true }
-      );
+      await User.findOneAndUpdate({ customerId }, { role }, { new: true });
     }
 
     res.json({ message: "Customer updated", customer: updated });
   } catch (err) {
     res.status(500).json({ message: "Failed to update customer", error: err.message });
+  }
+};
+
+// PUT /api/customer/deactivate?customerId=xxx
+exports.deactivate = async (req, res) => {
+  try {
+    const { customerId } = req.query;
+    const updated = await Customer.findOneAndUpdate(
+      { customerId },
+      { active: false },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "Customer not found" });
+    res.json({ message: "Customer deactivated", customerId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// PUT /api/customer/reactivate?customerId=xxx
+exports.reactivate = async (req, res) => {
+  try {
+    const { customerId } = req.query;
+    const updated = await Customer.findOneAndUpdate(
+      { customerId },
+      { active: true },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "Customer not found" });
+    res.json({ message: "Customer reactivated", customerId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

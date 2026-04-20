@@ -11,6 +11,7 @@ const customerSchema = new mongoose.Schema({
   senior:           Boolean,
   preferredContact: String,
   classBalance:     Number,
+  active:           { type: Boolean, default: true },
   // Registration fields
   emergencyContact: {
     name:  String,

@@ -1,11 +1,11 @@
-const crypto   = require("crypto");
-const QRCode   = require("qrcode");
-const Class    = require("../models/scheduleModel.cjs");
-const Checkin  = require("../models/checkinModel.cjs");
-const Customer = require("../models/customerModel.cjs");
+const crypto       = require("crypto");
+const QRCode       = require("qrcode");
+const Class        = require("../models/scheduleModel.cjs");
+const Checkin      = require("../models/checkinModel.cjs");
+const Customer     = require("../models/customerModel.cjs");
+const emailService = require("../utils/emailService.cjs");
 
-const MIN_BALANCE = -5; // customers can go down to -5
-
+const MIN_BALANCE = -5;
 const activeTokens = new Map();
 
 // POST /api/qr/generate
@@ -133,13 +133,15 @@ exports.checkin = async (req, res) => {
     });
     const checkinId = `CI${String(maxNumber + 1).padStart(3, "0")}`;
 
+    const checkinDatetime = new Date().toISOString();
+
     // Save check-in
     await new Checkin({
       checkinId,
       customerId:      customer.customerId,
       classId:         entry.classId,
       instructorId:    entry.instructorId,
-      checkinDatetime: new Date().toISOString(),
+      checkinDatetime,
     }).save();
 
     // Deduct balance
@@ -149,6 +151,17 @@ exports.checkin = async (req, res) => {
     );
 
     const newBalance = customer.classBalance - 1;
+
+    // Send check-in confirmation email (non-blocking)
+    if (customer.email) {
+      emailService.sendCheckinEmail({
+        firstName:       customer.firstName,
+        email:           customer.email,
+        className:       entry.className,
+        checkinDatetime,
+        newBalance,
+      }).catch(err => console.error("Check-in email failed:", err.message));
+    }
 
     // Build response message
     let message = `Welcome, ${customer.firstName}! You're checked in for ${entry.className}.`;

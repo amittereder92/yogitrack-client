@@ -10,9 +10,26 @@ exports.getClass = async (req, res) => {
   }
 };
 
+// Only returns active classes for dropdowns and portals
 exports.getClassIds = async (req, res) => {
   try {
-    const classes = await Class.find({}, { classId: 1, className: 1, classType: 1, instructorId: 1, _id: 0 }).sort({ classId: 1 });
+    const classes = await Class.find(
+      { active: { $ne: false } },
+      { classId: 1, className: 1, classType: 1, instructorId: 1, _id: 0 }
+    ).sort({ classId: 1 });
+    res.json(classes);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// Returns ALL classes including inactive (for admin management)
+exports.getAllClassIds = async (req, res) => {
+  try {
+    const classes = await Class.find(
+      {},
+      { classId: 1, className: 1, classType: 1, active: 1, _id: 0 }
+    ).sort({ classId: 1 });
     res.json(classes);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -41,7 +58,7 @@ exports.add = async (req, res) => {
   try {
     const { classId, className, instructorId, classType, description, daytime } = req.body;
     if (!className) return res.status(400).json({ message: "Missing required fields" });
-    const newClass = new Class({ classId, className, instructorId, classType, description, daytime });
+    const newClass = new Class({ classId, className, instructorId, classType, description, daytime, active: true });
     await newClass.save();
     res.status(201).json({ message: "Class added successfully", class: newClass });
   } catch (err) {
@@ -62,6 +79,38 @@ exports.update = async (req, res) => {
     res.json({ message: "Class updated", class: updated });
   } catch (err) {
     res.status(500).json({ message: "Failed to update class", error: err.message });
+  }
+};
+
+// PUT /api/schedule/deactivate?classId=xxx
+exports.deactivate = async (req, res) => {
+  try {
+    const { classId } = req.query;
+    const updated = await Class.findOneAndUpdate(
+      { classId },
+      { active: false },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "Class not found" });
+    res.json({ message: "Class deactivated", classId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// PUT /api/schedule/reactivate?classId=xxx
+exports.reactivate = async (req, res) => {
+  try {
+    const { classId } = req.query;
+    const updated = await Class.findOneAndUpdate(
+      { classId },
+      { active: true },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "Class not found" });
+    res.json({ message: "Class reactivated", classId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
