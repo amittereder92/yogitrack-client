@@ -5,6 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Reports</title>
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .form-box {
+      background: #fff;
+      border: 1px solid rgba(194,185,167,0.4);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+      box-sizing: border-box;
+    }
+    .form-box h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(14px,1.2vw,17px);
+      color: #3d3028;
+      margin: 0 0 1rem;
+    }
+    .form-box label {
+      display: block;
+      font-family: 'Lato', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9a8e84;
+      margin-bottom: 0.3rem;
+      margin-top: 0.75rem;
+    }
+    .form-box input[type="date"] {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #c2b9a7;
+      border-radius: 4px;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      background: #faf8f5;
+      color: #3d3028;
+      box-sizing: border-box;
+    }
+    .form-box button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.5rem;
+      background: #7a8c6e;
+      color: #faf8f5;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Lato', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .form-box button:hover { background: #5a6b50; }
+
+    .table-box {
+      background: #fff;
+      border: 1px solid rgba(194,185,167,0.4);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 700px;
+      overflow: hidden;
+    }
+    .table-box h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: clamp(14px,1.2vw,17px);
+      color: #3d3028;
+      margin: 0;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(194,185,167,0.3);
+      background: #f7f3ee;
+    }
+
+    /* Balance row highlights */
+    tr.balance-negative td { background: #fde8e8; color: #842029; }
+    tr.balance-empty td    { background: #fff3cd; color: #856404; }
+    tr.balance-low td      { background: #fff8e6; color: #7a5c00; }
+    tr.inactive-row td     { color: #c2b9a7; font-style: italic; }
+  </style>
 </head>
 <body>
 
@@ -35,25 +117,15 @@
 
       <h2>Reports</h2>
 
-<!-- Date Range Filter -->
-<div class="form-box">
-  <h3>Date Range</h3>
-  <label>Start Date</label>
-  <input type="date" id="startDate">
-
-  <label>End Date</label>
-  <input type="date" id="endDate">
-
-  <button onclick="loadAllReports()">Run Reports</button>
-</div>
-
-<script>
-  // Set endDate to today's date on page load
-  document.addEventListener("DOMContentLoaded", function () {
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById("endDate").value = today;
-  });
-</script>
+      <!-- Date Range Filter -->
+      <div class="form-box">
+        <h3>Date Range</h3>
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+        <label>End Date</label>
+        <input type="date" id="endDate">
+        <button onclick="loadAllReports()">Run Reports</button>
+      </div>
 
       <!-- Package Sales -->
       <div class="table-box">
@@ -72,7 +144,7 @@
 
       <!-- Instructor Report -->
       <div class="table-box">
-        <h3>Instructor Class & Check-ins</h3>
+        <h3>Instructor Class &amp; Check-ins</h3>
         <table>
           <thead>
             <tr>
@@ -85,14 +157,14 @@
         </table>
       </div>
 
-      <!-- Customer Packages -->
+      <!-- Customer Balances -->
       <div class="table-box">
-        <h3>Customer Packages</h3>
+        <h3>Customer Balance Report</h3>
         <table>
           <thead>
             <tr>
               <th>Customer</th>
-              <th>Package</th>
+              <th>Balance</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -107,8 +179,9 @@
           <thead>
             <tr>
               <th>Instructor</th>
-              <th>Month</th>
+              <th>Period</th>
               <th>Classes</th>
+              <th>Sessions Taught</th>
               <th>Check-ins</th>
               <th>Pay Rate</th>
               <th>Total Pay</th>
@@ -132,6 +205,12 @@
     }
   })();
 
+  // Set endDate to today on load
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    document.getElementById("endDate").value = today;
+  });
+
   function doLogout() {
     fetch('/api/auth/logout', { method: 'POST' })
       .then(() => window.location.href = '/index.html');
@@ -140,99 +219,115 @@
   function getDates() {
     return {
       start: document.getElementById('startDate').value,
-      end: document.getElementById('endDate').value
+      end:   document.getElementById('endDate').value,
     };
   }
 
   async function loadAllReports() {
-    loadSales();
-    loadInstructorReport();
-    loadCustomerReport();
-    loadPayments();
+    await Promise.all([
+      loadSales(),
+      loadInstructorReport(),
+      loadCustomerReport(),
+      loadPayments(),
+    ]);
   }
 
   // Package Sales
   async function loadSales() {
     const { start, end } = getDates();
-    const res = await fetch(`/api/reports/sales?start=${start}&end=${end}`);
+    const res  = await fetch(`/api/reports/sales?start=${start}&end=${end}`);
     const data = await res.json();
-
     const tbody = document.getElementById('salesTable');
     tbody.innerHTML = '';
-
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
+      return;
+    }
     data.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${r.package_name}</td>
-          <td>${r.sold}</td>
-          <td>$${r.revenue}</td>
-        </tr>
-      `;
+      tbody.innerHTML += `<tr>
+        <td>${r.package_name}</td>
+        <td>${r.sold}</td>
+        <td>$${r.revenue}</td>
+      </tr>`;
     });
   }
 
   // Instructor Report
   async function loadInstructorReport() {
     const { start, end } = getDates();
-    const res = await fetch(`/api/reports/instructors?start=${start}&end=${end}`);
+    const res  = await fetch(`/api/reports/instructors?start=${start}&end=${end}`);
     const data = await res.json();
-
     const tbody = document.getElementById('instructorTable');
     tbody.innerHTML = '';
-
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
+      return;
+    }
     data.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${r.instructor}</td>
-          <td>${r.class_name}</td>
-          <td>${r.checkins}</td>
-        </tr>
-      `;
+      tbody.innerHTML += `<tr>
+        <td>${r.instructor}</td>
+        <td>${r.class_name}</td>
+        <td>${r.checkins}</td>
+      </tr>`;
     });
   }
 
-  // Customer Packages
+  // Customer Balances with highlighting
   async function loadCustomerReport() {
-    const res = await fetch(`/api/reports/customers`);
+    const res  = await fetch(`/api/reports/customers`);
     const data = await res.json();
-
     const tbody = document.getElementById('customerTable');
     tbody.innerHTML = '';
-
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
+      return;
+    }
     data.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${r.customer}</td>
-          <td>${r.package}</td>
-          <td>${r.status}</td>
-        </tr>
+      const tr = document.createElement('tr');
+
+      // Highlight based on balance
+      if (!r.active) {
+        tr.className = 'inactive-row';
+      } else if (r.balance < 0) {
+        tr.className = 'balance-negative';
+      } else if (r.balance === 0) {
+        tr.className = 'balance-empty';
+      } else if (r.balance <= 2) {
+        tr.className = 'balance-low';
+      }
+
+      tr.innerHTML = `
+        <td>${r.customer}${!r.active ? ' <em>(inactive)</em>' : ''}</td>
+        <td>${r.package}</td>
+        <td>${r.status}</td>
       `;
+      tbody.appendChild(tr);
     });
   }
 
   // Teacher Payments
   async function loadPayments() {
     const { start, end } = getDates();
-    const res = await fetch(`/api/reports/payments?start=${start}&end=${end}`);
+    const res  = await fetch(`/api/reports/payments?start=${start}&end=${end}`);
     const data = await res.json();
-
     const tbody = document.getElementById('paymentTable');
     tbody.innerHTML = '';
-
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
+      return;
+    }
     data.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${r.instructor}</td>
-          <td>${r.month}</td>
-          <td>${r.classes}</td>
-          <td>${r.checkins}</td>
-          <td>$${r.pay_rate}</td>
-          <td>$${r.total_pay}</td>
-        </tr>
-      `;
+      tbody.innerHTML += `<tr>
+        <td>${r.instructor}</td>
+        <td>${r.month}</td>
+        <td>${r.classes}</td>
+        <td>${r.sessions}</td>
+        <td>${r.checkins}</td>
+        <td>${r.pay_rate}</td>
+        <td>$${r.total_pay}</td>
+      </tr>`;
     });
   }
-
 </script>
 
 </body>
