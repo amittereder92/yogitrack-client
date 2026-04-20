@@ -4,8 +4,8 @@ const Class    = require("../models/scheduleModel.cjs");
 const Checkin  = require("../models/checkinModel.cjs");
 const Customer = require("../models/customerModel.cjs");
 
-// In-memory store for active QR tokens (survives restarts with MongoDB in prod)
-// For production scale, store in MongoDB instead
+const MIN_BALANCE = -5; // customers can go down to -5
+
 const activeTokens = new Map();
 
 // POST /api/qr/generate
@@ -17,44 +17,32 @@ exports.generate = async (req, res) => {
     const cls = await Class.findOne({ classId });
     if (!cls) return res.status(404).json({ error: "Class not found" });
 
-    // Generate a secure random token
-    const token = crypto.randomBytes(32).toString("hex");
-
-    // Valid 30 mins before now until 30 mins from now
-    const now       = new Date();
-    const validFrom = new Date(now.getTime() - 30 * 60 * 1000);
+    const token      = crypto.randomBytes(32).toString("hex");
+    const now        = new Date();
     const validUntil = new Date(now.getTime() + 30 * 60 * 1000);
 
-    // Store token
     activeTokens.set(token, {
       classId,
-      className:   cls.className,
+      className:    cls.className,
       instructorId: cls.instructorId,
-      validFrom,
+      validFrom:    new Date(now.getTime() - 30 * 60 * 1000),
       validUntil,
     });
 
-    // Auto-expire token
     setTimeout(() => activeTokens.delete(token), 60 * 60 * 1000);
 
-    // Build check-in URL
-    const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
-    const checkinUrl = `${baseUrl}/checkin-qr.html?token=${token}`;
+    const baseUrl    = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+    const checkinUrl = `${baseUrl}/htmls/checkin-qr.html?token=${token}`;
 
-    // Generate QR code as data URL
     const qrDataUrl = await QRCode.toDataURL(checkinUrl, {
-      width: 400,
-      margin: 2,
+      width: 400, margin: 2,
       color: { dark: "#3d3028", light: "#f7f3ee" },
     });
 
     res.json({
-      success: true,
-      qrDataUrl,
-      checkinUrl,
-      className:   cls.className,
-      classId,
-      validUntil:  validUntil.toISOString(),
+      success: true, qrDataUrl, checkinUrl,
+      className: cls.className, classId,
+      validUntil: validUntil.toISOString(),
     });
 
   } catch (err) {
@@ -106,9 +94,8 @@ exports.checkin = async (req, res) => {
       return res.status(400).json({ error: "QR code has expired" });
     }
 
-    // Find customer — either from session or by email
+    // Find customer
     let customer = null;
-
     if (req.session.user && req.session.user.customerId) {
       customer = await Customer.findOne({ customerId: req.session.user.customerId });
     } else if (email) {
@@ -119,13 +106,15 @@ exports.checkin = async (req, res) => {
       return res.status(404).json({ error: "No customer found with that email. Please check and try again." });
     }
 
-    // Check balance
-    if (customer.classBalance <= 0) {
-      return res.status(400).json({ error: `${customer.firstName}, you have no remaining classes. Please purchase a package.` });
+    // Block if at minimum balance
+    if (customer.classBalance <= MIN_BALANCE) {
+      return res.status(400).json({
+        error: `${customer.firstName}, your account balance is at the minimum limit (${MIN_BALANCE}). Please see the front desk to update your package.`
+      });
     }
 
-    // Check if already checked in for this class today
-    const today = new Date().toISOString().slice(0, 10);
+    // Check duplicate
+    const today    = new Date().toISOString().slice(0, 10);
     const existing = await Checkin.findOne({
       customerId: customer.customerId,
       classId:    entry.classId,
@@ -136,39 +125,46 @@ exports.checkin = async (req, res) => {
     }
 
     // Get next checkin ID
-    const checkins  = await Checkin.find({});
-    let maxNumber   = 0;
+    const checkins = await Checkin.find({});
+    let maxNumber  = 0;
     checkins.forEach((c) => {
       const match = c.checkinId?.match(/\d+$/);
-      if (match) {
-        const num = parseInt(match[0]);
-        if (num > maxNumber) maxNumber = num;
-      }
+      if (match) { const num = parseInt(match[0]); if (num > maxNumber) maxNumber = num; }
     });
     const checkinId = `CI${String(maxNumber + 1).padStart(3, "0")}`;
 
     // Save check-in
-    const newCheckin = new Checkin({
+    await new Checkin({
       checkinId,
       customerId:      customer.customerId,
       classId:         entry.classId,
       instructorId:    entry.instructorId,
       checkinDatetime: new Date().toISOString(),
-    });
-    await newCheckin.save();
+    }).save();
 
-    // Deduct class balance
+    // Deduct balance
     await Customer.findOneAndUpdate(
       { customerId: customer.customerId },
       { $inc: { classBalance: -1 } }
     );
 
+    const newBalance = customer.classBalance - 1;
+
+    // Build response message
+    let message = `Welcome, ${customer.firstName}! You're checked in for ${entry.className}.`;
+    if (newBalance < 0) {
+      message += ` Your balance is now ${newBalance} — please see the front desk to purchase a package.`;
+    } else if (newBalance === 0) {
+      message += ` You have no classes remaining — consider purchasing a package soon.`;
+    }
+
     res.json({
       success:      true,
-      message:      `Welcome, ${customer.firstName}! You're checked in for ${entry.className}.`,
+      message,
       customerName: `${customer.firstName} ${customer.lastName}`,
       className:    entry.className,
-      newBalance:   customer.classBalance - 1,
+      newBalance,
+      warning:      newBalance <= 0,
     });
 
   } catch (err) {
