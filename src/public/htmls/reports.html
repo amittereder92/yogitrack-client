@@ -68,7 +68,6 @@
       margin-bottom: 1.5rem;
       width: 100%;
       max-width: 700px;
-      overflow: hidden;
     }
     .table-box h3 {
       font-family: 'Fraunces', serif;
@@ -79,6 +78,21 @@
       padding: 14px 18px;
       border-bottom: 1px solid rgba(194,185,167,0.3);
       background: #f7f3ee;
+    }
+    .table-box .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-box table {
+      min-width: 400px;
+    }
+    .form-box {
+      max-width: 700px;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      .form-box, .table-box { max-width: 100%; }
+      .content-panel { padding: 1rem !important; }
     }
 
     /* Balance row highlights */
@@ -130,7 +144,7 @@
       <!-- Package Sales -->
       <div class="table-box">
         <h3>Package Sales Report</h3>
-        <table>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Package</th>
@@ -139,13 +153,13 @@
             </tr>
           </thead>
           <tbody id="salesTable"></tbody>
-        </table>
+        </table></div>
       </div>
 
       <!-- Instructor Report -->
       <div class="table-box">
         <h3>Instructor Class &amp; Check-ins</h3>
-        <table>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Instructor</th>
@@ -154,13 +168,13 @@
             </tr>
           </thead>
           <tbody id="instructorTable"></tbody>
-        </table>
+        </table></div>
       </div>
 
       <!-- Customer Balances -->
       <div class="table-box">
         <h3>Customer Balance Report</h3>
-        <table>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Customer</th>
@@ -169,13 +183,13 @@
             </tr>
           </thead>
           <tbody id="customerTable"></tbody>
-        </table>
+        </table></div>
       </div>
 
       <!-- Teacher Payments -->
       <div class="table-box">
         <h3>Teacher Payment Report</h3>
-        <table>
+        <div class="table-scroll"><table>
           <thead>
             <tr>
               <th>Instructor</th>
@@ -188,7 +202,7 @@
             </tr>
           </thead>
           <tbody id="paymentTable"></tbody>
-        </table>
+        </table></div>
       </div>
 
     </div>
