@@ -205,10 +205,14 @@
     }
   })();
 
-  // Set endDate to today on load
-  document.addEventListener("DOMContentLoaded", function () {
+  // Set dates and auto-run reports on load
+  document.addEventListener("DOMContentLoaded", async function () {
     const today = new Date().toISOString().split("T")[0];
-    document.getElementById("endDate").value = today;
+    const firstOfMonth = new Date();
+    firstOfMonth.setDate(1);
+    document.getElementById("startDate").value = firstOfMonth.toISOString().split("T")[0];
+    document.getElementById("endDate").value   = today;
+    await loadAllReports();
   });
 
   function doLogout() {
