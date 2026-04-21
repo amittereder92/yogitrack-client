@@ -106,10 +106,10 @@ exports.checkin = async (req, res) => {
       return res.status(404).json({ error: "No customer found with that email. Please check and try again." });
     }
 
-    // Block if at minimum balance
-    if (customer.classBalance <= MIN_BALANCE) {
+    // Block if balance is 0 or below for self-service QR check-in
+    if (customer.classBalance <= 0) {
       return res.status(400).json({
-        error: `${customer.firstName}, your account balance is at the minimum limit (${MIN_BALANCE}). Please see the front desk to update your package.`
+        error: `${customer.firstName}, your account balance is ${customer.classBalance}. Please see the front desk to purchase a package before checking in.`
       });
     }
 
