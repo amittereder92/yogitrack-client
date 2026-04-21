@@ -73,9 +73,10 @@ exports.refund = async (req, res) => {
     if (checkin.refunded) return res.status(400).json({ error: "This check-in has already been refunded." });
 
     // Mark as refunded
+    const refundedBy = req.session?.user?.displayName || req.session?.user?.username || 'Unknown';
     await Checkin.findOneAndUpdate(
       { checkinId },
-      { refunded: true, refundedAt: new Date().toISOString() }
+      { refunded: true, refundedAt: new Date().toISOString(), refundedBy }
     );
 
     // Add 1 class back to customer balance

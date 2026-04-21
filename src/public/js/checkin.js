@@ -213,7 +213,7 @@ function renderTable(checkins) {
     }
 
     const refundedBadge = c.refunded
-      ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f5ece4;color:#8f5535;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Refunded</span>`
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f5ece4;color:#8f5535;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Refunded${c.refundedBy ? ` by ${c.refundedBy}` : ''}</span>`
       : '';
 
     const actionButtons = c.refunded

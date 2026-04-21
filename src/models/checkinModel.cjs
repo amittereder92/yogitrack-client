@@ -9,6 +9,7 @@ const checkinSchema = new mongoose.Schema({
   checkinDatetime: String,
   refunded:        { type: Boolean, default: false },
   refundedAt:      { type: String,  default: null },
+  refundedBy:      { type: String,  default: null },
 }, { collection: "checkin" });
 
 module.exports = mongoose.model("Checkin", checkinSchema);
