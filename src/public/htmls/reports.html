@@ -143,9 +143,15 @@
     const today = new Date().toISOString().split('T')[0];
     const firstOfMonth = new Date();
     firstOfMonth.setDate(1);
-    document.getElementById('startDate').value = firstOfMonth.toISOString().split('T')[0];
-    document.getElementById('endDate').value   = today;
-    await loadAllReports();
+    const y = firstOfMonth.getFullYear();
+    const m = String(firstOfMonth.getMonth() + 1).padStart(2, '0');
+    document.getElementById('startDate').value = `${y}-${m}-01`;
+
+    const today = new Date();
+    const ty = today.getFullYear();
+    const tm = String(today.getMonth() + 1).padStart(2, '0');
+    const td = String(today.getDate()).padStart(2, '0');
+    document.getElementById('endDate').value = `${ty}-${tm}-${td}`;
   })();
 
   function doLogout() {
