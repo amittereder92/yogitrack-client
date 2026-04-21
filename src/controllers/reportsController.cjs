@@ -20,13 +20,18 @@ function fmtTime(timeStr) {
   return `${hh % 12 || 12}:${String(mm).padStart(2, "0")} ${hh >= 12 ? "PM" : "AM"}`;
 }
 
-// Calculate number of weeks in date range
-function weeksInRange(start, end) {
+// Count how many times a specific weekday (0=Sun..6=Sat) occurs in the date range
+function countWeekdayOccurrences(start, end, weekdayIndex) {
   if (!start || !end) return null;
   const s = new Date(start);
   const e = new Date(end);
-  const days = Math.max(1, (e - s) / (1000 * 60 * 60 * 24));
-  return days / 7;
+  let count = 0;
+  const cur = new Date(s);
+  while (cur <= e) {
+    if (cur.getDay() === weekdayIndex) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
 }
 
 // GET /api/reports/sales?start=&end=
@@ -66,7 +71,11 @@ exports.instructors = async (req, res) => {
     if (start) checkins = checkins.filter(c => c.checkinDatetime >= start);
     if (end)   checkins = checkins.filter(c => c.checkinDatetime <= end + "T23:59:59");
 
-    const totalWeeks = weeksInRange(start, end);
+    // Pre-calculate how many times each weekday occurs in the date range
+    const weekdayCounts = {};
+    DAYS_ORDER.forEach((d, i) => {
+      weekdayCounts[d] = countWeekdayOccurrences(start, end, i);
+    });
 
     // Build result grouped by day
     const byDay = {};
@@ -74,54 +83,34 @@ exports.instructors = async (req, res) => {
 
     instrCustomers.forEach(instr => {
       const instrClasses = classes.filter(c => c.instructorId === instr.customerId);
-
-      if (!instrClasses.length) {
-        // Push to a special "unassigned" bucket
-        if (!byDay._none) byDay._none = [];
-        byDay._none.push({
-          instructor: `${instr.firstName} ${instr.lastName}`,
-          day:        "—",
-          time:       "—",
-          class_name: "No classes assigned",
-          checkins:   0,
-          avg_per_week: "—",
-        });
-        return;
-      }
+      if (!instrClasses.length) return;
 
       instrClasses.forEach(cls => {
-        const classCheckinCount = checkins.filter(ci => ci.classId === cls.classId && !ci.refunded).length;
-
-        // Each scheduled day/time slot becomes a row
         const slots = cls.daytime && cls.daytime.length ? cls.daytime : [{ day: "—", time: "" }];
         slots.forEach(slot => {
-          // Count checkins that fall on this day of week
+          // Count checkins for this class that fall on this day of week
           const dayCheckins = checkins.filter(ci => {
             if (ci.classId !== cls.classId || ci.refunded) return false;
             if (!slot.day || slot.day === "—") return true;
-            const ciDate = new Date(ci.checkinDatetime);
-            const ciDay  = DAYS_ORDER[ciDate.getDay()];
+            const ciDay = DAYS_ORDER[new Date(ci.checkinDatetime).getDay()];
             return ciDay === slot.day;
           }).length;
 
-          const avg = totalWeeks ? (dayCheckins / totalWeeks).toFixed(1) : "—";
+          // Avg = checkins / number of times that weekday occurred in range
+          const occurrences = weekdayCounts[slot.day];
+          const avg = occurrences ? (dayCheckins / occurrences).toFixed(1) : "—";
 
           const row = {
             instructor:   `${instr.firstName} ${instr.lastName}`,
             day:          slot.day || "—",
-            day_full:     DAY_FULL[slot.day] || slot.day || "—",
             time:         slot.time ? fmtTime(slot.time) : "—",
             class_name:   cls.className,
-            class_type:   cls.classType || "",
             checkins:     dayCheckins,
             avg_per_week: avg,
           };
 
           if (byDay[slot.day] !== undefined) {
             byDay[slot.day].push(row);
-          } else {
-            if (!byDay._other) byDay._other = [];
-            byDay._other.push(row);
           }
         });
       });
@@ -132,7 +121,7 @@ exports.instructors = async (req, res) => {
       byDay[d].sort((a, b) => a.time.localeCompare(b.time));
     });
 
-    res.json({ byDay, totalWeeks: totalWeeks ? totalWeeks.toFixed(1) : null });
+    res.json({ byDay, weekdayCounts });
   } catch (err) {
     console.error("Instructor report error:", err.message);
     res.status(500).json({ error: err.message });

@@ -209,13 +209,11 @@
           <tbody>`;
 
       rows.forEach(r => {
-        const typeTag = r.class_type && r.class_type !== 'General'
-          ? `<span class="class-type-tag">${r.class_type}</span>` : '';
         const avgBadge = r.avg_per_week !== '—'
           ? `<span class="avg-badge">${r.avg_per_week}</span>` : '—';
         html += `<tr>
           <td style="white-space:nowrap;">${r.time}</td>
-          <td>${r.class_name}${typeTag}</td>
+          <td>${r.class_name}</td>
           <td>${r.instructor}</td>
           <td>${r.checkins}</td>
           <td>${avgBadge}</td>
@@ -230,10 +228,13 @@
       return;
     }
 
-    const weekNote = totalWeeks ? `Based on ${parseFloat(totalWeeks).toFixed(1)} weeks in selected date range.` : '';
     container.innerHTML = html;
-    if (weekNote) {
-      container.insertAdjacentHTML('beforeend', `<div class="report-summary">${weekNote}</div>`);
+    if (data.weekdayCounts) {
+      const parts = Object.entries(data.weekdayCounts)
+        .filter(([d, n]) => n > 0)
+        .map(([d, n]) => `${d}: ${n}x`).join(' · ');
+      container.insertAdjacentHTML('beforeend',
+        `<div class="report-summary">Weekday occurrences in range — ${parts}</div>`);
     }
   }
 
