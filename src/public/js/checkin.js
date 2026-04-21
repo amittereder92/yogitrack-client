@@ -187,13 +187,14 @@ function renderTable(checkins) {
   const instructor = document.getElementById("filterInstructor").value;
   const date       = document.getElementById("filterDate").value;
 
-  const filtered = checkins.filter((c) => {
-    const matchSearch     = !search     || c.customerId.toLowerCase().includes(search) || c.classId.toLowerCase().includes(search);
-    const matchInstructor = !instructor || c.instructorId === instructor;
-    // Compare using the stored datetime string's date portion (UTC)
-    const matchDate       = !date       || c.checkinDatetime.slice(0, 10) === date;
-    return matchSearch && matchInstructor && matchDate;
-  });
+  const filtered = checkins
+    .filter((c) => {
+      const matchSearch     = !search     || c.customerId.toLowerCase().includes(search) || c.classId.toLowerCase().includes(search);
+      const matchInstructor = !instructor || c.instructorId === instructor;
+      const matchDate       = !date       || c.checkinDatetime.slice(0, 10) === date;
+      return matchSearch && matchInstructor && matchDate;
+    })
+    .sort((a, b) => b.checkinDatetime.localeCompare(a.checkinDatetime));
 
   const tbody = document.getElementById("checkinTableBody");
   const empty = document.getElementById("emptyState");
