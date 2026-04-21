@@ -109,14 +109,10 @@
       </div>
 
       <!-- Customer Balance -->
-      <div class="table-box">
+      <div class="table-box" id="customerBalanceBox">
         <h3>Customer Balance Report</h3>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Customer</th><th>Balance</th><th>Status</th></tr></thead>
-            <tbody id="customerTable"></tbody>
-          </table>
-        </div>
+        <div id="customerSummaryCards" style="padding:16px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px;"></div>
+        <div id="customerExpandedTable" style="display:none; padding:0 18px 16px;"></div>
       </div>
 
       <!-- Teacher Payments -->
@@ -243,26 +239,86 @@
     }
   }
 
-  // Customer Balance with highlighting
+  // Customer Balance — summary cards with expandable tables
+  let _customerData = [];
+  let _activeCard   = null;
+
   async function loadCustomerReport() {
-    const res  = await fetch(`/api/reports/customers`);
-    const data = await res.json();
-    const tbody = document.getElementById('customerTable');
-    tbody.innerHTML = '';
-    if (!data.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>'; return; }
-    data.forEach(r => {
-      const tr = document.createElement('tr');
-      if (!r.active)        tr.className = 'inactive-row';
-      else if (r.balance < 0)  tr.className = 'balance-negative';
-      else if (r.balance === 0) tr.className = 'balance-empty';
-      else if (r.balance <= 2)  tr.className = 'balance-low';
-      tr.innerHTML = `
-        <td>${r.customer}${!r.active ? ' <em>(inactive)</em>' : ''}</td>
-        <td>${r.balance}</td>
-        <td>${r.status}</td>
+    const res  = await fetch('/api/reports/customers');
+    _customerData = await res.json();
+
+    const negative = _customerData.filter(r => r.active !== false && r.balance < 0).sort((a,b) => a.balance - b.balance);
+    const positive = _customerData.filter(r => r.active !== false && r.balance > 0).sort((a,b) => b.balance - a.balance);
+
+    const cards = [
+      { id:'negative', label:'Negative Balance', count:negative.length, color:'#fde8e8', border:'#f1aeb5', text:'#842029', icon:'⬇', data:negative },
+      { id:'positive', label:'Positive Balance', count:positive.length, color:'#e4ede0', border:'#b2d4a8', text:'#3d6b2e', icon:'✓', data:positive },
+    ];
+
+    const container = document.getElementById('customerSummaryCards');
+    container.innerHTML = '';
+    cards.forEach(card => {
+      const div = document.createElement('div');
+      div.style.cssText = `background:${card.color};border:1px solid ${card.border};border-radius:8px;padding:14px 16px;cursor:pointer;transition:box-shadow 0.15s;`;
+      div.innerHTML = `
+        <div style="font-family:'Lato',sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${card.text};margin-bottom:6px;">${card.icon} ${card.label}</div>
+        <div style="font-family:'Fraunces',serif;font-size:clamp(28px,3vw,38px);font-weight:300;color:${card.text};line-height:1;">${card.count}</div>
+        <div style="font-family:'Lato',sans-serif;font-size:10px;color:${card.text};opacity:0.7;margin-top:4px;">customers</div>
       `;
-      tbody.appendChild(tr);
+      div.addEventListener('mouseenter', () => div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)');
+      div.addEventListener('mouseleave', () => div.style.boxShadow = '');
+      div.addEventListener('click', () => toggleCustomerCard(card, div));
+      container.appendChild(div);
     });
+
+    document.getElementById('customerExpandedTable').style.display = 'none';
+    _activeCard = null;
+  }
+
+  function toggleCustomerCard(card, cardEl) {
+    const expanded = document.getElementById('customerExpandedTable');
+
+    // If clicking same card, collapse
+    if (_activeCard === card.id) {
+      expanded.style.display = 'none';
+      _activeCard = null;
+      document.querySelectorAll('#customerSummaryCards > div').forEach(d => d.style.outline = '');
+      return;
+    }
+
+    _activeCard = card.id;
+    document.querySelectorAll('#customerSummaryCards > div').forEach(d => d.style.outline = '');
+    cardEl.style.outline = `2px solid ${card.border}`;
+
+    if (!card.data.length) {
+      expanded.innerHTML = '<p style="font-family:'Lato',sans-serif;font-size:12px;color:#9a8e84;font-style:italic;padding:12px 0;">No customers in this category.</p>';
+      expanded.style.display = 'block';
+      return;
+    }
+
+    let html = `<table style="width:100%;border-collapse:collapse;margin-top:8px;">
+      <thead style="background:#3d3028;color:#f7f3ee;">
+        <tr>
+          <th style="padding:8px 12px;text-align:left;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">Customer</th>
+          <th style="padding:8px 12px;text-align:center;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">Balance</th>
+          <th style="padding:8px 12px;text-align:left;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;">Status</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+    card.data.forEach((r, i) => {
+      const bg = i % 2 === 0 ? 'transparent' : 'rgba(237,232,224,0.3)';
+      html += `<tr style="background:${bg};">
+        <td style="padding:8px 12px;font-family:'Lato',sans-serif;font-size:13px;color:#3d3028;">${r.customer}${r.active === false ? ' <em style="color:#c2b9a7;">(inactive)</em>' : ''}</td>
+        <td style="padding:8px 12px;font-family:'Fraunces',serif;font-size:16px;font-weight:300;color:#3d3028;text-align:center;">${r.balance}</td>
+        <td style="padding:8px 12px;font-family:'Lato',sans-serif;font-size:12px;color:#9a8e84;">${r.status}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    expanded.innerHTML = html;
+    expanded.style.display = 'block';
+    expanded.scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
 
   // Teacher Payments
