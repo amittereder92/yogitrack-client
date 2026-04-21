@@ -184,7 +184,7 @@
           <h2>Log Check-in</h2>
           <div class="grid-2">
             <label>Customer
-              <select id="customerSelect" class="form-input styled-select" required>
+              <select id="customerSelect" class="form-input" required>
                 <option value="">-- Select Customer --</option>
               </select>
             </label>
@@ -361,13 +361,26 @@
     }
 
     // ── Check-ins ────────────────────────────────────────────────
+    let checkinCustChoices = null;
+
     function populateCheckinDropdowns() {
       const custSel = document.getElementById('customerSelect');
+      custSel.innerHTML = '<option value="">-- Select Customer --</option>';
       allCustomers.forEach(c => {
         const o = document.createElement('option');
         o.value = c.customerId;
-        o.textContent = `${c.customerId}: ${c.firstName} ${c.lastName}`;
+        o.textContent = `${c.firstName} ${c.lastName} (${c.customerId})`;
         custSel.appendChild(o);
+      });
+
+      if (checkinCustChoices) { checkinCustChoices.destroy(); checkinCustChoices = null; }
+      checkinCustChoices = new Choices(custSel, {
+        searchEnabled:          true,
+        searchPlaceholderValue: 'Type to search…',
+        itemSelectText:         '',
+        shouldSort:             false,
+        placeholder:            true,
+        placeholderValue:       '-- Select Customer --',
       });
 
       const clsSel = document.getElementById('classSelect');
@@ -532,7 +545,7 @@
     }
 
     function clearCheckinForm() {
-      document.getElementById('customerSelect').value = '';
+      if (checkinCustChoices) checkinCustChoices.setChoiceByValue('');
       document.getElementById('classSelect').value    = '';
       document.getElementById('checkinQrBtn').style.display = 'none';
       const now = new Date(); now.setSeconds(0,0);
