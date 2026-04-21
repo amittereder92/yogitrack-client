@@ -204,6 +204,7 @@ a { text-decoration: none; }
 .content-panel {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: clamp(16px, 2.5vh, 32px) clamp(16px, 2.5vw, 32px) 48px;
   display: flex;
   flex-direction: column;
@@ -401,7 +402,7 @@ select:focus, .form-input:focus, .styled-select:focus {
   border-radius: 6px;
   box-shadow: 0 2px 20px rgba(61, 48, 40, 0.07);
   border: 1px solid rgba(194, 185, 167, 0.35);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .table-header {
@@ -413,6 +414,7 @@ select:focus, .form-input:focus, .styled-select:focus {
   flex-wrap: wrap;
   gap: 0.75rem;
   background: var(--cream-dark);
+  border-radius: 6px 6px 0 0;
 }
 
 .table-header h2 {
@@ -495,19 +497,14 @@ tbody td { padding: 0.65rem 1rem; vertical-align: middle; color: var(--bark); }
 /* ── Mobile: hide wings, expand center col ─────────────────── */
 @media (max-width: 768px) {
 
-  /* Hide the dark vignette wings */
   .page-shell::before { display: none; }
-
-  /* Hide the logo/brand on the left wing */
   .wing-brand { display: none; }
 
-  /* Expand center column to full screen */
   .center-col {
     left: 0;
     right: 0;
   }
 
-  /* Nav: allow wrapping and smaller text */
   .topnav {
     padding: 0 10px;
     height: auto;
@@ -537,28 +534,23 @@ tbody td { padding: 0.65rem 1rem; vertical-align: middle; color: var(--bark); }
     flex-shrink: 0;
   }
 
-  /* Stack grid-2 to single column */
   .grid-2 { grid-template-columns: 1fr; }
 
-  /* Content padding */
   .content-panel {
     padding: 16px 12px 48px;
   }
 
-  /* Cards full width */
   .card, .card--wide {
     max-width: 100%;
     padding: 16px;
   }
 
-  /* Tables scroll horizontally */
   .table-wrap {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Button rows stack more compactly */
   .btn-row {
     gap: 0.4rem;
   }
