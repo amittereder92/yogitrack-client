@@ -37,7 +37,7 @@
       padding:8px 10px;
       text-align:left;
       border-bottom:1px solid rgba(194,185,167,0.3);
-      background:#f7f3ee;
+      background:transparent;
     }
     .schedule-table td {
       font-family:'Lato',sans-serif;
@@ -46,9 +46,10 @@
       padding:10px 10px;
       border-bottom:1px solid rgba(237,232,224,0.8);
       vertical-align:middle;
+      background:transparent;
     }
     .schedule-table tr:last-child td { border-bottom:none; }
-    .schedule-table tr:hover td { background:#f7f3ee; }
+    .schedule-table tr:hover td { background:rgba(237,232,224,0.4); }
     .class-type-tag { display:inline-block; font-size:9px; padding:1px 7px; border-radius:8px; background:#ede8e0; color:#7a6e65; font-family:'Lato',sans-serif; letter-spacing:0.06em; margin-left:6px; vertical-align:middle; }
     .no-classes { font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:10px 0; }
     .qr-btn {
@@ -492,16 +493,37 @@
       todays.forEach(c => {
         const cust = allCustomers.find(cu => cu.customerId === c.customerId);
         const cls  = allClasses.find(cl => cl.classId === c.classId);
-        const dt   = new Date(c.checkinDatetime).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+        const dt   = new Date(c.checkinDatetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const tr   = document.createElement('tr');
+        if (c.refunded) tr.style.opacity = '0.55';
+        const refundedBadge = c.refunded
+          ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f5ece4;color:#8f5535;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Refunded</span>`
+          : '';
+        const actionButtons = c.refunded
+          ? `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;opacity:0.5;" disabled>Delete</button>`
+          : `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;" onclick="deleteCheckin('${c.checkinId}')">Delete</button>
+             <button class="btn" style="padding:.3rem .7rem;font-size:.8rem;background:#b5724a;color:#faf8f5;border-color:#b5724a;" onclick="refundCheckin('${c.checkinId}')">Refund</button>`;
         tr.innerHTML = `
           <td>${cust ? `${cust.firstName} ${cust.lastName}` : c.customerId}</td>
-          <td>${cls ? cls.className : c.classId}</td>
+          <td>${cls ? cls.className : c.classId}${refundedBadge}</td>
           <td>${dt}</td>
-          <td><button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;" onclick="deleteCheckin('${c.checkinId}')">Delete</button></td>
+          <td style="white-space:nowrap;">${actionButtons}</td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    async function refundCheckin(checkinId) {
+      if (!confirm(`Refund this check-in? This will add 1 class back to the customer's balance.`)) return;
+      try {
+        const res  = await fetch(`/api/checkin/refund?checkinId=${checkinId}`, { method: 'PUT' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Refund failed');
+        alert(`✅ ${data.message}`);
+        loadTodayCheckins();
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
     }
 
     async function deleteCheckin(checkinId) {

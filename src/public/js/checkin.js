@@ -81,7 +81,6 @@ document.getElementById("customerSelect").addEventListener("change", async () =>
     const res      = await fetch(`/api/customer/getCustomer?customerId=${customerId}`);
     const customer = await res.json();
     banner.style.display = "block";
-
     const bal = customer.classBalance;
 
     if (bal <= MIN_BALANCE) {
@@ -119,13 +118,11 @@ document.getElementById("saveCheckinBtn").addEventListener("click", async () => 
     const customer = await custRes.json();
     const bal      = customer.classBalance;
 
-    // Block at minimum
     if (bal <= MIN_BALANCE) {
       alert(`⛔ ${customer.firstName} ${customer.lastName} is at the minimum balance (${MIN_BALANCE}). Please update their package before checking in.`);
       return;
     }
 
-    // Warn for zero or negative
     if (bal <= 0) {
       const proceed = confirm(`⚠ WARNING: ${customer.firstName} ${customer.lastName} has ${bal} classes remaining. Their balance will go to ${bal - 1}.\n\nProceed with check-in?`);
       if (!proceed) return;
@@ -142,7 +139,6 @@ document.getElementById("saveCheckinBtn").addEventListener("click", async () => 
     const result = await saveRes.json();
     if (!saveRes.ok) throw new Error(result.message || "Failed to save check-in");
 
-    // Always deduct balance
     await fetch(`/api/customer/update?customerId=${customerId}`, {
       method:  "PUT",
       headers: { "Content-Type": "application/json" },
@@ -195,16 +191,26 @@ function renderTable(checkins) {
     const dt        = new Date(c.checkinDatetime);
     const formatted = dt.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
     const tr        = document.createElement("tr");
+
+    if (c.refunded) {
+      tr.style.opacity = "0.55";
+    }
+
+    const refundedBadge = c.refunded
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f5ece4;color:#8f5535;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Refunded</span>`
+      : '';
+
+    const actionButtons = c.refunded
+      ? `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;opacity:0.5;" disabled>Delete</button>`
+      : `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;" onclick="deleteCheckin('${c.checkinId}')">Delete</button>
+         <button class="btn" style="padding:.3rem .7rem;font-size:.8rem;background:#b5724a;color:#faf8f5;border-color:#b5724a;" onclick="refundCheckin('${c.checkinId}')">Refund</button>`;
+
     tr.innerHTML = `
       <td>${c.customerId}</td>
       <td>${c.classId}</td>
       <td>${c.instructorId}</td>
-      <td>${formatted}</td>
-      <td>
-        <button class="btn btn--danger"
-          style="padding:.3rem .7rem; font-size:.8rem;"
-          onclick="deleteCheckin('${c.checkinId}')">Delete</button>
-      </td>
+      <td>${formatted}${refundedBadge}</td>
+      <td style="white-space:nowrap;">${actionButtons}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -213,6 +219,19 @@ function renderTable(checkins) {
 document.getElementById("searchInput").addEventListener("input",       () => renderTable(window._checkins || []));
 document.getElementById("filterInstructor").addEventListener("change", () => renderTable(window._checkins || []));
 document.getElementById("filterDate").addEventListener("change",       () => renderTable(window._checkins || []));
+
+async function refundCheckin(checkinId) {
+  if (!confirm(`Refund check-in ${checkinId}? This will add 1 class back to the customer's balance.`)) return;
+  try {
+    const res  = await fetch(`/api/checkin/refund?checkinId=${checkinId}`, { method: "PUT" });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Refund failed");
+    alert(`✅ ${data.message}`);
+    loadCheckins();
+  } catch (err) {
+    alert("❌ Error: " + err.message);
+  }
+}
 
 async function deleteCheckin(checkinId) {
   if (!confirm(`Delete check-in ${checkinId}? This cannot be undone.`)) return;

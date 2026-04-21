@@ -37,16 +37,14 @@ exports.add = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const newCheckin = new Checkin({ checkinId, customerId, classId, instructorId, checkinDatetime });
+    const newCheckin = new Checkin({ checkinId, customerId, classId, instructorId, checkinDatetime, refunded: false });
     await newCheckin.save();
 
     // Send check-in confirmation email (non-blocking)
     try {
       const customer = await Customer.findOne({ customerId });
       const cls      = await Class.findOne({ classId });
-
       if (customer && customer.email && cls) {
-        // Get current balance after deduction (caller handles balance update)
         emailService.sendCheckinEmail({
           firstName:       customer.firstName,
           email:           customer.email,
@@ -62,6 +60,42 @@ exports.add = async (req, res) => {
     res.status(201).json({ message: "Check-in added successfully", checkin: newCheckin });
   } catch (err) {
     res.status(500).json({ message: "Failed to add check-in", error: err.message });
+  }
+};
+
+// PUT /api/checkin/refund?checkinId=xxx
+exports.refund = async (req, res) => {
+  try {
+    const { checkinId } = req.query;
+
+    const checkin = await Checkin.findOne({ checkinId });
+    if (!checkin) return res.status(404).json({ error: "Check-in not found" });
+    if (checkin.refunded) return res.status(400).json({ error: "This check-in has already been refunded." });
+
+    // Mark as refunded
+    await Checkin.findOneAndUpdate(
+      { checkinId },
+      { refunded: true, refundedAt: new Date().toISOString() }
+    );
+
+    // Add 1 class back to customer balance
+    const customer = await Customer.findOne({ customerId: checkin.customerId });
+    if (customer) {
+      await Customer.findOneAndUpdate(
+        { customerId: checkin.customerId },
+        { $inc: { classBalance: 1 } }
+      );
+    }
+
+    const newBalance = (customer?.classBalance || 0) + 1;
+
+    res.json({
+      success:    true,
+      message:    `Check-in ${checkinId} refunded. Balance restored to ${newBalance}.`,
+      newBalance,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
