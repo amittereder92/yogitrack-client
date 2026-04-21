@@ -113,12 +113,13 @@ exports.checkin = async (req, res) => {
       });
     }
 
-    // Check duplicate
+    // Check duplicate — ignore refunded check-ins
     const today    = new Date().toISOString().slice(0, 10);
     const existing = await Checkin.findOne({
       customerId: customer.customerId,
       classId:    entry.classId,
       checkinDatetime: { $regex: `^${today}` },
+      refunded: { $ne: true },
     });
     if (existing) {
       return res.status(400).json({ error: `${customer.firstName}, you're already checked in for this class today!` });
