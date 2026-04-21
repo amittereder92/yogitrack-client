@@ -251,9 +251,12 @@
     const negative = _customerData.filter(r => r.active !== false && r.balance < 0).sort((a,b) => a.balance - b.balance);
     const positive = _customerData.filter(r => r.active !== false && r.balance > 0).sort((a,b) => b.balance - a.balance);
 
+    const negTotal = negative.reduce((sum, r) => sum + r.balance, 0);
+    const posTotal = positive.reduce((sum, r) => sum + r.balance, 0);
+
     const cards = [
-      { id:'negative', label:'Negative Balance', count:negative.length, color:'#fde8e8', border:'#f1aeb5', text:'#842029', icon:'⬇', data:negative },
-      { id:'positive', label:'Positive Balance', count:positive.length, color:'#e4ede0', border:'#b2d4a8', text:'#3d6b2e', icon:'✓', data:positive },
+      { id:'negative', label:'Negative Balance', count:negative.length, total:negTotal, color:'#fde8e8', border:'#f1aeb5', text:'#842029', icon:'⬇', data:negative },
+      { id:'positive', label:'Positive Balance', count:positive.length, total:posTotal, color:'#e4ede0', border:'#b2d4a8', text:'#3d6b2e', icon:'✓', data:positive },
     ];
 
     const container = document.getElementById('customerSummaryCards');
@@ -263,8 +266,8 @@
       div.style.cssText = `background:${card.color};border:1px solid ${card.border};border-radius:8px;padding:14px 16px;cursor:pointer;transition:box-shadow 0.15s;`;
       div.innerHTML = `
         <div style="font-family:'Lato',sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:${card.text};margin-bottom:6px;">${card.icon} ${card.label}</div>
-        <div style="font-family:'Fraunces',serif;font-size:clamp(28px,3vw,38px);font-weight:300;color:${card.text};line-height:1;">${card.count}</div>
-        <div style="font-family:'Lato',sans-serif;font-size:10px;color:${card.text};opacity:0.7;margin-top:4px;">customers</div>
+        <div style="font-family:'Fraunces',serif;font-size:clamp(28px,3vw,38px);font-weight:300;color:${card.text};line-height:1;">${card.total}</div>
+        <div style="font-family:'Lato',sans-serif;font-size:10px;color:${card.text};opacity:0.7;margin-top:4px;">total credits &nbsp;·&nbsp; ${card.count} customers</div>
       `;
       div.addEventListener('mouseenter', () => div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)');
       div.addEventListener('mouseleave', () => div.style.boxShadow = '');
