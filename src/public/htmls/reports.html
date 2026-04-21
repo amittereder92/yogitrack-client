@@ -7,105 +7,52 @@
   <link rel="stylesheet" href="../css/style.css">
   <style>
     .form-box {
-      background: #fff;
-      border: 1px solid rgba(194,185,167,0.4);
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 700px;
-      box-sizing: border-box;
+      background:#fff; border:1px solid rgba(194,185,167,0.4); border-radius:8px;
+      padding:20px 24px; margin-bottom:1.5rem; width:100%; max-width:700px; box-sizing:border-box;
     }
-    .form-box h3 {
-      font-family: 'Fraunces', serif;
-      font-weight: 400;
-      font-size: clamp(14px,1.2vw,17px);
-      color: #3d3028;
-      margin: 0 0 1rem;
-    }
-    .form-box label {
-      display: block;
-      font-family: 'Lato', sans-serif;
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #9a8e84;
-      margin-bottom: 0.3rem;
-      margin-top: 0.75rem;
-    }
-    .form-box input[type="date"] {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #c2b9a7;
-      border-radius: 4px;
-      font-family: 'Lato', sans-serif;
-      font-size: 13px;
-      background: #faf8f5;
-      color: #3d3028;
-      box-sizing: border-box;
-    }
-    .form-box button {
-      margin-top: 1rem;
-      padding: 0.6rem 1.5rem;
-      background: #7a8c6e;
-      color: #faf8f5;
-      border: none;
-      border-radius: 4px;
-      font-family: 'Lato', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .form-box button:hover { background: #5a6b50; }
+    .form-box h3 { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0 0 1rem; }
+    .form-box label { display:block; font-family:'Lato',sans-serif; font-size:10px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:#9a8e84; margin-bottom:0.3rem; margin-top:0.75rem; }
+    .form-box input[type="date"] { width:100%; padding:0.5rem 0.75rem; border:1px solid #c2b9a7; border-radius:4px; font-family:'Lato',sans-serif; font-size:13px; background:#faf8f5; color:#3d3028; box-sizing:border-box; }
+    .form-box button { margin-top:1rem; padding:0.6rem 1.5rem; background:#7a8c6e; color:#faf8f5; border:none; border-radius:4px; font-family:'Lato',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; }
+    .form-box button:hover { background:#5a6b50; }
 
-    .table-box {
-      background: #fff;
-      border: 1px solid rgba(194,185,167,0.4);
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      width: 100%;
-      max-width: 700px;
-    }
-    .table-box h3 {
-      font-family: 'Fraunces', serif;
-      font-weight: 400;
-      font-size: clamp(14px,1.2vw,17px);
-      color: #3d3028;
-      margin: 0;
-      padding: 14px 18px;
-      border-bottom: 1px solid rgba(194,185,167,0.3);
-      background: #f7f3ee;
-    }
-    .table-box .table-scroll {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .table-box table {
-      min-width: 400px;
-    }
-    .form-box {
-      max-width: 700px;
-      width: 100%;
-    }
-    @media (max-width: 600px) {
-      .form-box, .table-box { max-width: 100%; }
-      .content-panel { padding: 1rem !important; }
-    }
+    .table-box { background:#fff; border:1px solid rgba(194,185,167,0.4); border-radius:8px; margin-bottom:1.5rem; width:100%; max-width:700px; }
+    .table-box h3 { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0; padding:14px 18px; border-bottom:1px solid rgba(194,185,167,0.3); background:#f7f3ee; border-radius:8px 8px 0 0; }
+    .table-box .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .table-box table { min-width:400px; }
 
     /* Balance row highlights */
-    tr.balance-negative td { background: #fde8e8; color: #842029; }
-    tr.balance-empty td    { background: #fff3cd; color: #856404; }
-    tr.balance-low td      { background: #fff8e6; color: #7a5c00; }
-    tr.inactive-row td     { color: #c2b9a7; font-style: italic; }
+    tr.balance-negative td { background:#fde8e8 !important; color:#842029; }
+    tr.balance-empty td    { background:#fff3cd !important; color:#856404; }
+    tr.balance-low td      { background:#fff8e6 !important; color:#7a5c00; }
+    tr.inactive-row td     { color:#c2b9a7; font-style:italic; }
+
+    /* Instructor schedule layout */
+    .instr-day-block { margin-bottom:20px; }
+    .instr-day-heading {
+      font-family:'Lato',sans-serif;
+      font-size:clamp(10px,0.85vw,11px);
+      font-weight:500;
+      letter-spacing:0.2em;
+      text-transform:uppercase;
+      color:#3d3028;
+      padding:10px 18px 8px;
+      border-bottom:1.5px solid #ede8e0;
+      background:#f7f3ee;
+    }
+    .instr-table { width:100%; border-collapse:collapse; }
+    .instr-table th { font-family:'Lato',sans-serif; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#9a8e84; padding:8px 12px; text-align:left; border-bottom:1px solid rgba(194,185,167,0.3); background:#faf8f5; font-weight:500; }
+    .instr-table td { font-family:'Lato',sans-serif; font-size:clamp(11px,0.9vw,13px); color:#3d3028; padding:9px 12px; border-bottom:1px solid rgba(237,232,224,0.8); vertical-align:middle; }
+    .instr-table tr:last-child td { border-bottom:none; }
+    .instr-table tr:hover td { background:#f7f3ee; }
+    .class-type-tag { display:inline-block; font-size:9px; padding:1px 6px; border-radius:8px; background:#ede8e0; color:#7a6e65; font-family:'Lato',sans-serif; letter-spacing:0.06em; margin-left:5px; vertical-align:middle; }
+    .avg-badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:10px; background:#e4ede0; color:#3d6b2e; font-family:'Lato',sans-serif; }
+    .no-data { font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:12px 18px; }
+    .report-summary { font-family:'Lato',sans-serif; font-size:11px; color:#9a8e84; padding:8px 18px; border-top:1px solid rgba(194,185,167,0.3); background:#f7f3ee; border-radius:0 0 8px 8px; }
   </style>
 </head>
 <body>
-
 <div class="page-shell">
-
   <a class="wing-brand" href="dashboard.html">
     <img src="../images/Logo.png" alt="YogiTrack Logo">
     <span class="wing-brand-name">YogiTrack</span>
@@ -113,7 +60,6 @@
   </a>
 
   <div class="center-col">
-
     <nav class="topnav">
       <div class="nav-links">
         <a href="dashboard.html">Dashboard</a>
@@ -128,10 +74,9 @@
     </nav>
 
     <div class="content-panel">
-
       <h2>Reports</h2>
 
-      <!-- Date Range Filter -->
+      <!-- Date Range -->
       <div class="form-box">
         <h3>Date Range</h3>
         <label>Start Date</label>
@@ -144,67 +89,43 @@
       <!-- Package Sales -->
       <div class="table-box">
         <h3>Package Sales Report</h3>
-        <div class="table-scroll"><table>
-          <thead>
-            <tr>
-              <th>Package</th>
-              <th>Sold</th>
-              <th>Total Revenue</th>
-            </tr>
-          </thead>
-          <tbody id="salesTable"></tbody>
-        </table></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Package</th><th>Sold</th><th>Total Revenue</th></tr></thead>
+            <tbody id="salesTable"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Instructor Report -->
-      <div class="table-box">
+      <!-- Instructor Report (day-by-day) -->
+      <div class="table-box" id="instructorReportBox">
         <h3>Instructor Class &amp; Check-ins</h3>
-        <div class="table-scroll"><table>
-          <thead>
-            <tr>
-              <th>Instructor</th>
-              <th>Class</th>
-              <th>Check-ins</th>
-            </tr>
-          </thead>
-          <tbody id="instructorTable"></tbody>
-        </table></div>
+        <div id="instructorByDay"><p class="no-data">Loading...</p></div>
       </div>
 
-      <!-- Customer Balances -->
+      <!-- Customer Balance -->
       <div class="table-box">
         <h3>Customer Balance Report</h3>
-        <div class="table-scroll"><table>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Balance</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="customerTable"></tbody>
-        </table></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Customer</th><th>Balance</th><th>Status</th></tr></thead>
+            <tbody id="customerTable"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Teacher Payments -->
       <div class="table-box">
         <h3>Teacher Payment Report</h3>
-        <div class="table-scroll"><table>
-          <thead>
-            <tr>
-              <th>Instructor</th>
-              <th>Period</th>
-              <th>Classes</th>
-              <th>Sessions Taught</th>
-              <th>Check-ins</th>
-              <th>Pay Rate</th>
-              <th>Total Pay</th>
-            </tr>
-          </thead>
-          <tbody id="paymentTable"></tbody>
-        </table></div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Instructor</th><th>Period</th><th>Classes</th><th>Sessions Taught</th><th>Check-ins</th><th>Pay Rate</th><th>Total Pay</th></tr>
+            </thead>
+            <tbody id="paymentTable"></tbody>
+          </table>
+        </div>
       </div>
-
     </div>
   </div>
 </div>
@@ -232,19 +153,11 @@
   }
 
   function getDates() {
-    return {
-      start: document.getElementById('startDate').value,
-      end:   document.getElementById('endDate').value,
-    };
+    return { start: document.getElementById('startDate').value, end: document.getElementById('endDate').value };
   }
 
   async function loadAllReports() {
-    await Promise.all([
-      loadSales(),
-      loadInstructorReport(),
-      loadCustomerReport(),
-      loadPayments(),
-    ]);
+    await Promise.all([ loadSales(), loadInstructorReport(), loadCustomerReport(), loadPayments() ]);
   }
 
   // Package Sales
@@ -254,66 +167,92 @@
     const data = await res.json();
     const tbody = document.getElementById('salesTable');
     tbody.innerHTML = '';
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
-      return;
-    }
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>'; return; }
     data.forEach(r => {
-      tbody.innerHTML += `<tr>
-        <td>${r.package_name}</td>
-        <td>${r.sold}</td>
-        <td>$${r.revenue}</td>
-      </tr>`;
+      tbody.innerHTML += `<tr><td>${r.package_name}</td><td>${r.sold}</td><td>$${r.revenue}</td></tr>`;
     });
   }
 
-  // Instructor Report
+  // Instructor Report (day-by-day)
+  const DAYS_ORDER = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const DAY_FULL   = { Sun:"Sunday", Mon:"Monday", Tue:"Tuesday", Wed:"Wednesday", Thu:"Thursday", Fri:"Friday", Sat:"Saturday" };
+
   async function loadInstructorReport() {
     const { start, end } = getDates();
     const res  = await fetch(`/api/reports/instructors?start=${start}&end=${end}`);
     const data = await res.json();
-    const tbody = document.getElementById('instructorTable');
-    tbody.innerHTML = '';
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
+    const container = document.getElementById('instructorByDay');
+
+    if (!data.byDay) { container.innerHTML = '<p class="no-data">No data available.</p>'; return; }
+
+    const { byDay, totalWeeks } = data;
+    let html = '';
+    let hasAny = false;
+
+    DAYS_ORDER.forEach(day => {
+      const rows = byDay[day] || [];
+      if (!rows.length) return;
+      hasAny = true;
+
+      html += `<div class="instr-day-block">
+        <div class="instr-day-heading">${DAY_FULL[day]}</div>
+        <table class="instr-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Class</th>
+              <th>Instructor</th>
+              <th>Check-ins</th>
+              <th>Avg / Week</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      rows.forEach(r => {
+        const typeTag = r.class_type && r.class_type !== 'General'
+          ? `<span class="class-type-tag">${r.class_type}</span>` : '';
+        const avgBadge = r.avg_per_week !== '—'
+          ? `<span class="avg-badge">${r.avg_per_week}</span>` : '—';
+        html += `<tr>
+          <td style="white-space:nowrap;">${r.time}</td>
+          <td>${r.class_name}${typeTag}</td>
+          <td>${r.instructor}</td>
+          <td>${r.checkins}</td>
+          <td>${avgBadge}</td>
+        </tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+    });
+
+    if (!hasAny) {
+      container.innerHTML = '<p class="no-data">No classes or check-ins in this date range.</p>';
       return;
     }
-    data.forEach(r => {
-      tbody.innerHTML += `<tr>
-        <td>${r.instructor}</td>
-        <td>${r.class_name}</td>
-        <td>${r.checkins}</td>
-      </tr>`;
-    });
+
+    const weekNote = totalWeeks ? `Based on ${parseFloat(totalWeeks).toFixed(1)} weeks in selected date range.` : '';
+    container.innerHTML = html;
+    if (weekNote) {
+      container.insertAdjacentHTML('beforeend', `<div class="report-summary">${weekNote}</div>`);
+    }
   }
 
-  // Customer Balances with highlighting
+  // Customer Balance with highlighting
   async function loadCustomerReport() {
     const res  = await fetch(`/api/reports/customers`);
     const data = await res.json();
     const tbody = document.getElementById('customerTable');
     tbody.innerHTML = '';
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
-      return;
-    }
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>'; return; }
     data.forEach(r => {
       const tr = document.createElement('tr');
-
-      // Highlight based on balance
-      if (!r.active) {
-        tr.className = 'inactive-row';
-      } else if (r.balance < 0) {
-        tr.className = 'balance-negative';
-      } else if (r.balance === 0) {
-        tr.className = 'balance-empty';
-      } else if (r.balance <= 2) {
-        tr.className = 'balance-low';
-      }
-
+      if (!r.active)        tr.className = 'inactive-row';
+      else if (r.balance < 0)  tr.className = 'balance-negative';
+      else if (r.balance === 0) tr.className = 'balance-empty';
+      else if (r.balance <= 2)  tr.className = 'balance-low';
       tr.innerHTML = `
         <td>${r.customer}${!r.active ? ' <em>(inactive)</em>' : ''}</td>
-        <td>${r.package}</td>
+        <td>${r.balance}</td>
         <td>${r.status}</td>
       `;
       tbody.appendChild(tr);
@@ -327,10 +266,7 @@
     const data = await res.json();
     const tbody = document.getElementById('paymentTable');
     tbody.innerHTML = '';
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>';
-      return;
-    }
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9a8e84;font-style:italic;">No data</td></tr>'; return; }
     data.forEach(r => {
       tbody.innerHTML += `<tr>
         <td>${r.instructor}</td>
@@ -344,6 +280,5 @@
     });
   }
 </script>
-
 </body>
 </html>

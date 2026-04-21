@@ -5,19 +5,36 @@ const Class    = require("../models/scheduleModel.cjs");
 const User     = require("../models/userModel.cjs");
 const Sale     = require("../models/saleModel.cjs");
 
+const DAYS_ORDER = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DAY_FULL   = { Sun:"Sunday", Mon:"Monday", Tue:"Tuesday", Wed:"Wednesday", Thu:"Thursday", Fri:"Friday", Sat:"Saturday" };
+
 // Pay formula: max($25, min($60, students × $5))
 function calcSessionPay(studentCount) {
   return Math.max(25, Math.min(60, studentCount * 5));
+}
+
+function fmtTime(timeStr) {
+  if (!timeStr) return "";
+  const [h, m] = timeStr.split(":");
+  const hh = parseInt(h), mm = parseInt(m);
+  return `${hh % 12 || 12}:${String(mm).padStart(2, "0")} ${hh >= 12 ? "PM" : "AM"}`;
+}
+
+// Calculate number of weeks in date range
+function weeksInRange(start, end) {
+  if (!start || !end) return null;
+  const s = new Date(start);
+  const e = new Date(end);
+  const days = Math.max(1, (e - s) / (1000 * 60 * 60 * 24));
+  return days / 7;
 }
 
 // GET /api/reports/sales?start=&end=
 exports.sales = async (req, res) => {
   try {
     const { start, end } = req.query;
-
     const packages = await Package.find({});
     let sales      = await Sale.find({});
-
     if (start) sales = sales.filter(s => s.saleDate >= start);
     if (end)   sales = sales.filter(s => s.saleDate <= end + "T23:59:59");
 
@@ -25,11 +42,7 @@ exports.sales = async (req, res) => {
       const pkgSales = sales.filter(s => s.packageId === p.packageId);
       const sold     = pkgSales.length;
       const revenue  = pkgSales.reduce((sum, s) => sum + (parseFloat(s.amountPaid) || 0), 0);
-      return {
-        package_name: p.packageName,
-        sold,
-        revenue: revenue.toFixed(2),
-      };
+      return { package_name: p.packageName, sold, revenue: revenue.toFixed(2) };
     });
 
     res.json(result);
@@ -53,30 +66,73 @@ exports.instructors = async (req, res) => {
     if (start) checkins = checkins.filter(c => c.checkinDatetime >= start);
     if (end)   checkins = checkins.filter(c => c.checkinDatetime <= end + "T23:59:59");
 
-    const result = [];
+    const totalWeeks = weeksInRange(start, end);
+
+    // Build result grouped by day
+    const byDay = {};
+    DAYS_ORDER.forEach(d => byDay[d] = []);
 
     instrCustomers.forEach(instr => {
       const instrClasses = classes.filter(c => c.instructorId === instr.customerId);
 
-      if (instrClasses.length === 0) {
-        result.push({
+      if (!instrClasses.length) {
+        // Push to a special "unassigned" bucket
+        if (!byDay._none) byDay._none = [];
+        byDay._none.push({
           instructor: `${instr.firstName} ${instr.lastName}`,
+          day:        "—",
+          time:       "—",
           class_name: "No classes assigned",
           checkins:   0,
+          avg_per_week: "—",
         });
-      } else {
-        instrClasses.forEach(cls => {
-          const classCheckins = checkins.filter(ci => ci.classId === cls.classId).length;
-          result.push({
-            instructor: `${instr.firstName} ${instr.lastName}`,
-            class_name: cls.className,
-            checkins:   classCheckins,
-          });
-        });
+        return;
       }
+
+      instrClasses.forEach(cls => {
+        const classCheckinCount = checkins.filter(ci => ci.classId === cls.classId && !ci.refunded).length;
+
+        // Each scheduled day/time slot becomes a row
+        const slots = cls.daytime && cls.daytime.length ? cls.daytime : [{ day: "—", time: "" }];
+        slots.forEach(slot => {
+          // Count checkins that fall on this day of week
+          const dayCheckins = checkins.filter(ci => {
+            if (ci.classId !== cls.classId || ci.refunded) return false;
+            if (!slot.day || slot.day === "—") return true;
+            const ciDate = new Date(ci.checkinDatetime);
+            const ciDay  = DAYS_ORDER[ciDate.getDay()];
+            return ciDay === slot.day;
+          }).length;
+
+          const avg = totalWeeks ? (dayCheckins / totalWeeks).toFixed(1) : "—";
+
+          const row = {
+            instructor:   `${instr.firstName} ${instr.lastName}`,
+            day:          slot.day || "—",
+            day_full:     DAY_FULL[slot.day] || slot.day || "—",
+            time:         slot.time ? fmtTime(slot.time) : "—",
+            class_name:   cls.className,
+            class_type:   cls.classType || "",
+            checkins:     dayCheckins,
+            avg_per_week: avg,
+          };
+
+          if (byDay[slot.day] !== undefined) {
+            byDay[slot.day].push(row);
+          } else {
+            if (!byDay._other) byDay._other = [];
+            byDay._other.push(row);
+          }
+        });
+      });
     });
 
-    res.json(result);
+    // Sort each day by time
+    DAYS_ORDER.forEach(d => {
+      byDay[d].sort((a, b) => a.time.localeCompare(b.time));
+    });
+
+    res.json({ byDay, totalWeeks: totalWeeks ? totalWeeks.toFixed(1) : null });
   } catch (err) {
     console.error("Instructor report error:", err.message);
     res.status(500).json({ error: err.message });
@@ -91,16 +147,15 @@ exports.customers = async (req, res) => {
     const result = customers.map(c => {
       const bal = c.classBalance || 0;
       let status;
-      if (bal < 0)       status = `Negative (${bal})`;
+      if (bal < 0)        status = `Negative (${bal})`;
       else if (bal === 0) status = "Empty — needs renewal";
       else if (bal <= 2)  status = `Low (${bal} left)`;
       else                status = `Active (${bal} left)`;
 
       return {
         customer: `${c.firstName} ${c.lastName}`,
-        package:  bal !== 0 ? `${bal} class${Math.abs(bal) !== 1 ? "es" : ""} remaining` : "No classes",
+        balance:  bal,
         status,
-        balance:  bal, // pass raw balance for frontend highlighting
         active:   c.active !== false,
       };
     });
@@ -135,9 +190,8 @@ exports.payments = async (req, res) => {
     instrCustomers.forEach(instr => {
       const instrClasses  = classes.filter(c => c.instructorId === instr.customerId);
       const instrClassIds = instrClasses.map(c => c.classId);
-      const instrCheckins = checkins.filter(ci => instrClassIds.includes(ci.classId));
+      const instrCheckins = checkins.filter(ci => instrClassIds.includes(ci.classId) && !ci.refunded);
 
-      // Group checkins by class + date to get sessions
       const sessionMap = {};
       instrCheckins.forEach(ci => {
         const dateKey = ci.checkinDatetime ? ci.checkinDatetime.slice(0, 10) : "unknown";
@@ -151,16 +205,14 @@ exports.payments = async (req, res) => {
         totalPay += calcSessionPay(studentCount);
       });
 
-      const sessionCount = Object.keys(sessionMap).length;
-
       result.push({
-        instructor:    `${instr.firstName} ${instr.lastName}`,
-        month:         monthLabel,
-        classes:       instrClasses.length,
-        sessions:      sessionCount,
-        checkins:      instrCheckins.length,
-        pay_rate:      "$25–$60 per session",
-        total_pay:     totalPay.toFixed(2),
+        instructor: `${instr.firstName} ${instr.lastName}`,
+        month:      monthLabel,
+        classes:    instrClasses.length,
+        sessions:   Object.keys(sessionMap).length,
+        checkins:   instrCheckins.length,
+        pay_rate:   "$25–$60 per session",
+        total_pay:  totalPay.toFixed(2),
       });
     });
 
