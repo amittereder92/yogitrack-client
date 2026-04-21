@@ -500,9 +500,8 @@
           ? `<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f5ece4;color:#8f5535;font-size:9px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px;">Refunded</span>`
           : '';
         const actionButtons = c.refunded
-          ? `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;opacity:0.5;" disabled>Delete</button>`
-          : `<button class="btn btn--danger" style="padding:.3rem .7rem;font-size:.8rem;" onclick="deleteCheckin('${c.checkinId}')">Delete</button>
-             <button class="btn" style="padding:.3rem .7rem;font-size:.8rem;background:#b5724a;color:#faf8f5;border-color:#b5724a;" onclick="refundCheckin('${c.checkinId}')">Refund</button>`;
+          ? `<span style="font-family:'Lato',sans-serif;font-size:9px;color:#8f5535;letter-spacing:0.06em;text-transform:uppercase;">Refunded</span>`
+          : `<button class="btn" style="padding:.3rem .7rem;font-size:.8rem;background:#b5724a;color:#faf8f5;border-color:#b5724a;" onclick="refundCheckin('${c.checkinId}')">Refund</button>`;
         tr.innerHTML = `
           <td>${cust ? `${cust.firstName} ${cust.lastName}` : c.customerId}</td>
           <td>${cls ? cls.className : c.classId}${refundedBadge}</td>
