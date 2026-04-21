@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YogiTrack • Check-ins</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.css">
+  <style>
+    .choices__inner { background:#faf8f5; border:1px solid #c2b9a7; border-radius:4px; padding:0.4rem 0.6rem; font-family:'Lato',sans-serif; font-size:clamp(13px,1vw,15px); font-weight:300; color:#3d3028; min-height:unset; }
+    .choices__inner:focus-within { border-color:#7a8c6e; box-shadow:0 0 0 3px rgba(122,140,110,0.12); }
+    .choices__list--dropdown { border:1px solid #c2b9a7; border-radius:4px; background:#faf8f5; font-family:'Lato',sans-serif; z-index:100; }
+    .choices__list--dropdown .choices__item--selectable { font-size:13px; color:#3d3028; padding:8px 12px; }
+    .choices__list--dropdown .choices__item--selectable.is-highlighted { background:#ede8e0; color:#3d3028; }
+    .choices__input { font-family:'Lato',sans-serif; font-size:13px; background:#faf8f5; color:#3d3028; }
+    .choices[data-type*=select-one] .choices__inner { padding-right:2rem; }
+    .choices__placeholder { color:#9a8e84; }
+    .choices__list--single { padding:0; }
+    .choices__list--single .choices__item { font-size:13px; color:#3d3028; }
+  </style>
 </head>
 <body>
 
@@ -36,29 +49,28 @@
         <form class="card card--wide" id="checkinForm">
           <h2>Log Check-in</h2>
 
+          <label>Customer
+            <select name="customerId" id="customerSelect" class="form-input" required>
+              <option value="">-- Select Customer --</option>
+            </select>
+          </label>
+
           <div class="grid-2">
-            <label>Customer
-              <select name="customerId" id="customerSelect" class="form-input styled-select" required>
-                <option value="">-- Select Customer --</option>
-              </select>
-            </label>
             <label>Class
               <select name="classId" id="classSelect" class="form-input styled-select" required>
                 <option value="">-- Select Class --</option>
               </select>
             </label>
-          </div>
-
-          <div class="grid-2">
             <label>Instructor
               <select name="instructorId" id="instructorSelect" class="form-input styled-select" required>
                 <option value="">-- Select Instructor --</option>
               </select>
             </label>
-            <label>Date &amp; Time
-              <input type="datetime-local" name="checkinDatetime" id="checkinDatetime" required>
-            </label>
           </div>
+
+          <label>Date &amp; Time
+            <input type="datetime-local" name="checkinDatetime" id="checkinDatetime" required>
+          </label>
 
           <div id="validationBanner"></div>
 
@@ -100,6 +112,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/10.2.0/choices.min.js"></script>
   <script>
     (async function() {
       const res  = await fetch('/api/auth/me');

@@ -14,17 +14,31 @@ async function initDropdowns() {
   document.getElementById("checkinDatetime").value = now.toISOString().slice(0, 16);
 }
 
+let customerChoices = null;
+
 async function loadCustomerDropdown() {
-  const select = document.getElementById("customerSelect");
-  select.innerHTML = '<option value="">-- Select Customer --</option>';
   try {
     const res       = await fetch("/api/customer/getCustomerIds");
     const customers = await res.json();
+
+    if (customerChoices) { customerChoices.destroy(); customerChoices = null; }
+
+    const select = document.getElementById("customerSelect");
+    select.innerHTML = '<option value="">-- Select Customer --</option>';
     customers.forEach((c) => {
       const option = document.createElement("option");
       option.value = c.customerId;
-      option.textContent = `${c.customerId}: ${c.firstName} ${c.lastName}`;
+      option.textContent = `${c.firstName} ${c.lastName} (${c.customerId})`;
       select.appendChild(option);
+    });
+
+    customerChoices = new Choices(select, {
+      searchEnabled:          true,
+      searchPlaceholderValue: "Type to search…",
+      itemSelectText:         "",
+      shouldSort:             false,
+      placeholder:            true,
+      placeholderValue:       "-- Select Customer --",
     });
   } catch (err) {
     console.error("Failed to load customers:", err);
@@ -246,7 +260,7 @@ async function deleteCheckin(checkinId) {
 }
 
 function clearCheckinForm() {
-  document.getElementById("customerSelect").value   = "";
+  if (customerChoices) customerChoices.setChoiceByValue("");
   document.getElementById("classSelect").value      = "";
   document.getElementById("instructorSelect").value = "";
   const now = new Date(); now.setSeconds(0, 0);
