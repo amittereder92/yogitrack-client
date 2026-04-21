@@ -8,7 +8,7 @@
   <style>
     .form-box {
       background:#fff; border:1px solid rgba(194,185,167,0.4); border-radius:8px;
-      padding:20px 24px; margin-bottom:1.5rem; width:100%; max-width:700px; box-sizing:border-box;
+      padding:20px 24px; margin-bottom:1.5rem; width:100%; max-width:100%; box-sizing:border-box;
     }
     .form-box h3 { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0 0 1rem; }
     .form-box label { display:block; font-family:'Lato',sans-serif; font-size:10px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:#9a8e84; margin-bottom:0.3rem; margin-top:0.75rem; }
@@ -16,10 +16,10 @@
     .form-box button { margin-top:1rem; padding:0.6rem 1.5rem; background:#7a8c6e; color:#faf8f5; border:none; border-radius:4px; font-family:'Lato',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; }
     .form-box button:hover { background:#5a6b50; }
 
-    .table-box { background:#fff; border:1px solid rgba(194,185,167,0.4); border-radius:8px; margin-bottom:1.5rem; width:100%; max-width:700px; }
+    .table-box { background:#fff; border:1px solid rgba(194,185,167,0.4); border-radius:8px; margin-bottom:1.5rem; width:100%; max-width:100%; }
     .table-box h3 { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(14px,1.2vw,17px); color:#3d3028; margin:0; padding:14px 18px; border-bottom:1px solid rgba(194,185,167,0.3); background:#f7f3ee; border-radius:8px 8px 0 0; }
     .table-box .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .table-box table { min-width:400px; }
+    .table-box table { width:100%; min-width:unset; table-layout:auto; }
 
     /* Balance row highlights */
     tr.balance-negative td { background:#fde8e8 !important; color:#842029; }
@@ -40,11 +40,16 @@
       border-bottom:1.5px solid #ede8e0;
       background:#f7f3ee;
     }
-    .instr-table { width:100%; border-collapse:collapse; }
+    .instr-table { width:100%; border-collapse:collapse; table-layout:fixed; }
     .instr-table th { font-family:'Lato',sans-serif; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#9a8e84; padding:8px 12px; text-align:left; border-bottom:1px solid rgba(194,185,167,0.3); background:#faf8f5; font-weight:500; }
-    .instr-table td { font-family:'Lato',sans-serif; font-size:clamp(11px,0.9vw,13px); color:#3d3028; padding:9px 12px; border-bottom:1px solid rgba(237,232,224,0.8); vertical-align:middle; }
+    .instr-table td { font-family:'Lato',sans-serif; font-size:clamp(11px,0.9vw,13px); color:#3d3028; padding:9px 12px; border-bottom:1px solid rgba(237,232,224,0.8); vertical-align:middle; overflow:hidden; text-overflow:ellipsis; }
     .instr-table tr:last-child td { border-bottom:none; }
     .instr-table tr:hover td { background:#f7f3ee; }
+    .instr-table th:nth-child(1), .instr-table td:nth-child(1) { width:12%; }
+    .instr-table th:nth-child(2), .instr-table td:nth-child(2) { width:25%; }
+    .instr-table th:nth-child(3), .instr-table td:nth-child(3) { width:30%; }
+    .instr-table th:nth-child(4), .instr-table td:nth-child(4) { width:15%; text-align:center; }
+    .instr-table th:nth-child(5), .instr-table td:nth-child(5) { width:18%; text-align:center; }
     .class-type-tag { display:inline-block; font-size:9px; padding:1px 6px; border-radius:8px; background:#ede8e0; color:#7a6e65; font-family:'Lato',sans-serif; letter-spacing:0.06em; margin-left:5px; vertical-align:middle; }
     .avg-badge { display:inline-block; font-size:10px; padding:2px 8px; border-radius:10px; background:#e4ede0; color:#3d6b2e; font-family:'Lato',sans-serif; }
     .no-data { font-family:'Lato',sans-serif; font-size:12px; color:#c2b9a7; font-style:italic; padding:12px 18px; }
