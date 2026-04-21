@@ -140,18 +140,13 @@
       window.location.href = '/index.html';
       return;
     }
-    const today = new Date().toISOString().split('T')[0];
-    const firstOfMonth = new Date();
-    firstOfMonth.setDate(1);
-    const y = firstOfMonth.getFullYear();
-    const m = String(firstOfMonth.getMonth() + 1).padStart(2, '0');
-    document.getElementById('startDate').value = `${y}-${m}-01`;
-
-    const today = new Date();
-    const ty = today.getFullYear();
-    const tm = String(today.getMonth() + 1).padStart(2, '0');
-    const td = String(today.getDate()).padStart(2, '0');
-    document.getElementById('endDate').value = `${ty}-${tm}-${td}`;
+    const now = new Date();
+    const ty  = now.getFullYear();
+    const tm  = String(now.getMonth() + 1).padStart(2, '0');
+    const td  = String(now.getDate()).padStart(2, '0');
+    document.getElementById('startDate').value = `${ty}-${tm}-01`;
+    document.getElementById('endDate').value   = `${ty}-${tm}-${td}`;
+    await loadAllReports();
   })();
 
   function doLogout() {
