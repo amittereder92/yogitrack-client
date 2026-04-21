@@ -190,8 +190,7 @@ function renderTable(checkins) {
   const filtered = checkins.filter((c) => {
     const matchSearch     = !search     || c.customerId.toLowerCase().includes(search) || c.classId.toLowerCase().includes(search);
     const matchInstructor = !instructor || c.instructorId === instructor;
-    // Compare using the stored datetime string's date portion (UTC)
-    const matchDate       = !date       || c.checkinDatetime.slice(0, 10) === date;
+    const matchDate       = !date       || c.checkinDatetime.startsWith(date);
     return matchSearch && matchInstructor && matchDate;
   });
 

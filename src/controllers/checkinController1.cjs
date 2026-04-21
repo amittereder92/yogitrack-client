@@ -14,10 +14,10 @@ exports.getCheckins = async (req, res) => {
 
 exports.getNextId = async (req, res) => {
   try {
-    const checkins = await Checkin.find({}, { checkinId: 1 });
+    const checkins = await Checkin.find({});
     let maxNumber = 0;
     checkins.forEach((c) => {
-      const match = c.checkinId?.match(/\d+$/);
+      const match = c.checkinId.match(/\d+$/);
       if (match) {
         const num = parseInt(match[0]);
         if (num > maxNumber) maxNumber = num;
